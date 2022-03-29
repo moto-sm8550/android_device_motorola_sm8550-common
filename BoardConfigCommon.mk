@@ -73,7 +73,8 @@ TARGET_KERNEL_CONFIG := \
     gki_defconfig \
     vendor/kalama_GKI.config \
     vendor/ext_config/moto-kalama.config \
-    vendor/ext_config/moto-kalama-gki.config
+    vendor/ext_config/moto-kalama-gki.config \
+    vendor/debugfs.config
 
 # Kernel modules
 TARGET_KERNEL_EXT_MODULE_ROOT := kernel/motorola/sm8550-modules
