@@ -1,22 +1,12 @@
 #
-# Copyright (C) 2022 The LineageOS Project
+# Copyright (C) 2022-2023 The LineageOS Project
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 #
 
 BOARD_VENDOR := motorola
 
-COMMON_PATH := device/motorola/sm8475-common
+COMMON_PATH := device/motorola/sm8550-common
 
 # Architecture
 TARGET_ARCH := arm64
@@ -54,18 +44,18 @@ BOARD_KERNEL_SEPARATED_DTBO := true
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_RAMDISK_USE_LZ4 := true
 BOARD_USES_GENERIC_KERNEL_IMAGE := true
-TARGET_KERNEL_SOURCE := kernel/motorola/sm8475
+TARGET_KERNEL_SOURCE := kernel/motorola/sm8550
 TARGET_KERNEL_CONFIG := \
     gki_defconfig \
-    vendor/waipio_GKI.config \
-    vendor/ext_config/moto-waipio.config \
-    vendor/ext_config/moto-waipio-gki.config \
-    vendor/ext_config/lineage-moto-waipio.config
+    vendor/kalama_GKI.config \
+    vendor/ext_config/moto-kalama.config \
+    vendor/ext_config/moto-kalama-gki.config \
+    vendor/ext_config/lineage-moto-kalama.config
 KERNEL_LTO := none
 
 # Platform
 BOARD_USES_QCOM_HARDWARE := true
-TARGET_BOARD_PLATFORM := taro
+TARGET_BOARD_PLATFORM := kalama
 
 # A/B
 AB_OTA_UPDATER := true
@@ -129,8 +119,7 @@ DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := \
     $(COMMON_PATH)/device_framework_matrix.xml \
     vendor/lineage/config/device_framework_matrix.xml
 DEVICE_MATRIX_FILE := $(COMMON_PATH)/compatibility_matrix.xml
-DEVICE_MANIFEST_SKUS := cape
-DEVICE_MANIFEST_CAPE_FILES += $(COMMON_PATH)/manifest_cape.xml
+DEVICE_MANIFEST_FILE += $(COMMON_PATH)/manifest.xml
 
 # Metadata
 BOARD_USES_METADATA_PARTITION := true
@@ -219,4 +208,4 @@ WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
 # inherit from the proprietary version
-include vendor/motorola/sm8475-common/BoardConfigVendor.mk
+include vendor/motorola/sm8550-common/BoardConfigVendor.mk
