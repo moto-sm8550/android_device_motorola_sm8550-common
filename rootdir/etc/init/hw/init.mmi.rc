@@ -276,6 +276,12 @@ on boot
 
  # Change ownership and permission for leds backlight
    chmod 0664 /sys/class/leds/lcd-backlight/brightness
+   chown system system /sys/class/leds/charging/brightness
+   chmod 0664 /sys/class/leds/charging/brightness
+
+   # change permission of red leds
+   chown system system /sys/class/leds/red/brightness
+   chmod 0664 /sys/class/leds/red/brightness
 
    # Change ownership and permission for vibrator
    chown system system /sys/class/timed_output/vibrator/enable
@@ -314,17 +320,6 @@ on boot
    chown system system /sys/class/capsense/reset
    chown system system /sys/class/capsense/int_state
 
-   wait /sys/class/capsense/capsense0/fac_enable 1
-   wait /sys/class/capsense/capsense0/fac_cal 1
-   chmod 0660 /sys/class/capsense/capsense0/fac_cal
-   chmod 0660 /sys/class/capsense/capsense0/fac_enable
-   chown system system /sys/class/capsense/capsense0/fac_detect
-   chown system system /sys/class/capsense/capsense0/fac_enable
-   chown system system /sys/class/capsense/capsense0/fac_cal
-   chown system system /sys/class/capsense/capsense0/fac_irq_state
-   chown system system /sys/class/capsense/capsense0/fac_compensation
-   chown system system /sys/class/capsense/capsense0/fac_raw
-   chown system system /sys/class/capsense/capsense0/reset
 
 on late-fs-charger
     class_start early_hal

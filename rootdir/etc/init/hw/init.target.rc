@@ -90,19 +90,15 @@ on fs
     restorecon_recursive /mnt/vendor/persist
     mkdir /mnt/vendor/persist/data 0700 system system
 
-on fs && property:ro.boot.product.vendor.sku=taro
-    mkdir /mnt/vendor/spunvm 0660 system system
-    wait /dev/block/bootdevice/by-name/spunvm
-    mount vfat /dev/block/bootdevice/by-name/spunvm /mnt/vendor/spunvm rw noatime shortname=lower,uid=1000,gid=1000,dmask=007,fmask=007,context=u:object_r:vendor_spunvm_file:s0
-
-on fs && property:ro.boot.product.vendor.sku=cape
-    mkdir /mnt/vendor/spunvm 0660 system system
-    wait /dev/block/bootdevice/by-name/spunvm
-    mount vfat /dev/block/bootdevice/by-name/spunvm /mnt/vendor/spunvm rw noatime shortname=lower,uid=1000,gid=1000,dmask=007,fmask=007,context=u:object_r:vendor_spunvm_file:s0
+on property:ro.boot.product.vendor.sku=kalama
+    setprop ro.soc.model kalama
 
 on post-fs
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
+    #Execute virtualization manager
+    enable vendor.qvirtmgr
+    start  vendor.qvirtmgr
 
 on late-fs
     wait_for_prop hwservicemanager.ready true
@@ -132,10 +128,6 @@ on boot
     chmod 0660 /sys/devices/platform/soc/990000.i2c/i2c-0/0-0038/trusted_touch_enable
     chown system /sys/devices/platform/soc/990000.spi/spi_master/spi0/spi0.0/trusted_touch_enable
     chmod 0660 /sys/devices/platform/soc/990000.spi/spi_master/spi0/spi0.0/trusted_touch_enable
-    chown system /sys/devices/platform/soc/980000.i2c/i2c-0/0-0062/trusted_touch_enable
-    chmod 0660 /sys/devices/platform/soc/980000.i2c/i2c-0/0-0062/trusted_touch_enable
-    chown system /sys/devices/platform/soc/980000.i2c/i2c-0/0-0062/trusted_touch_event
-    chmod 0660 /sys/devices/platform/soc/980000.i2c/i2c-0/0-0062/trusted_touch_event
     chown system /sys/devices/system/cpu/hyp_core_ctl/enable
     chown system /sys/devices/system/cpu/hyp_core_ctl/hcc_min_freq
     #USB controller configuration
@@ -185,10 +177,10 @@ service vendor.per_proxy /vendor/bin/pm-proxy
     group system
     disabled
 
-service vendor.mdm_helper /vendor/bin/mdm_helper
-    class core
-    group system wakelock
-    disabled
+#service vendor.mdm_helper /vendor/bin/mdm_helper
+#    class core
+#    group system wakelock
+#    disabled
 
 service vendor.mdm_launcher /vendor/bin/sh /vendor/bin/init.mdm.sh
     class core
@@ -205,6 +197,14 @@ on early-boot && property:persist.vendor.pcie.boot_option=*
     write /sys/bus/platform/devices/1c00000.qcom,pcie/debug/boot_option ${persist.vendor.pcie.boot_option}
     write /sys/bus/platform/devices/1c08000.qcom,pcie/debug/boot_option ${persist.vendor.pcie.boot_option}
 
-on property:sys.boot_completed=1
-    enable vendor.qvirtmgr
-    start  vendor.qvirtmgr
+service fan_control_turn_on /vendor/bin/fan_service 1
+    class late_start
+    user root
+    disabled
+    oneshot
+
+service fan_control_turn_off /vendor/bin/fan_service 0
+    class late_start
+    user root
+    disabled
+    oneshot

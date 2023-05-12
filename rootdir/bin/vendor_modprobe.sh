@@ -1,6 +1,6 @@
 #! /vendor/bin/sh
 #=============================================================================
-# Copyright (c) 2019-2021 Qualcomm Technologies, Inc.
+# Copyright (c) 2019-2022 Qualcomm Technologies, Inc.
 # All Rights Reserved.
 # Confidential and Proprietary - Qualcomm Technologies, Inc.
 #=============================================================================
@@ -33,7 +33,7 @@ do
 	fi
 	# load modules individually in case one of them fails to init
 	for module in ${other_modules}; do
-		( ${MODPROBE} -b -s -d ${dir} -a ${module} > /dev/null ) &
+		( ${MODPROBE} -b -d ${dir} -a ${module} > /dev/null ) &
 	done
 
 	wait
