@@ -28,7 +28,7 @@
 /*
 Changes from Qualcomm Innovation Center are provided under the following license:
 
-Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted (subject to the limitations in the
@@ -92,13 +92,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   by the decode routine and should be checked so that the correct number of
   elements in the array will be accessed.
 
- *====*====*====*====*====*====*====*====*====*====*====*====*====*====*====*/
+*/
 /*====*====*====*====*====*====*====*====*====*====*====*====*====*====*====*
  *THIS IS AN AUTO GENERATED FILE. DO NOT ALTER IN ANY WAY
  *====*====*====*====*====*====*====*====*====*====*====*====*====*====*====*/
 
 /* This file was generated with Tool version 6.14.7
-   It was generated on: Tue May  3 2022 (Spin 0)
+   It was generated on: Thu Oct 13 2022 (Spin 0)
    From IDL File: location_service_v02.idl */
 
 /** @defgroup loc_qmi_consts Constant values defined in the IDL */
@@ -124,11 +124,11 @@ extern "C" {
 /** Major Version Number of the IDL used to generate this file */
 #define LOC_V02_IDL_MAJOR_VERS 0x02
 /** Revision Number of the IDL used to generate this file */
-#define LOC_V02_IDL_MINOR_VERS 0x99
+#define LOC_V02_IDL_MINOR_VERS 0x9C
 /** Major Version Number of the qmi_idl_compiler used to generate this file */
 #define LOC_V02_IDL_TOOL_VERS 0x06
 /** Maximum Defined Message ID */
-#define LOC_V02_MAX_MESSAGE_ID 0x00E8
+#define LOC_V02_MAX_MESSAGE_ID 0x00E9
 /**
     @}
   */
@@ -325,6 +325,9 @@ extern "C" {
 #define QMI_LOC_SV_POLY_XYZ_0_TH_ORDER_COEFF_SIZE_V02 3
 #define QMI_LOC_SV_POLY_XYZ_N_TH_ORDER_COEFF_SIZE_V02 9
 #define QMI_LOC_SV_POLY_SV_CLKBIAS_COEFF_SIZE_V02 4
+#define QMI_LOC_SV_POLY_XYZ_COEFF_ORDER_SIZE_MAX_V02 5
+#define QMI_LOC_SV_POLY_SV_CLKBIAS_COEFF_SIZE_MAX_V02 6
+#define QMI_LOC_SV_POLY_XYZ_COEFF_SIZE_MAX_V02 18
 
 /**  IBeacon string maximum length.   */
 #define QMI_LOC_MAX_IBEACON_UUID_STR_LENGTH_V02 32
@@ -571,6 +574,7 @@ extern "C" {
 #define QMI_LOC_FIX_STATUS_TOO_FEW_SVS_V02 0x02
 #define QMI_LOC_FIX_STATUS_HEPE_CHECK_FAILED_V02 0x04
 #define QMI_LOC_FIX_STATUS_LOW_RELIABILITY_V02 0x08
+#define QMI_LOC_MAX_APP_HASH_LEN_V02 64
 /**
     @}
   */
@@ -3584,12 +3588,12 @@ typedef struct {
        - 0x00 (FALSE) -- Civic Address is not needed \n
        - 0x01 (TRUE) -- Civic Address is needed
 
-    NOTE: If the civic address is available with the AP, the AP Shall inject
-    the same using the new QMI API QMI_LOC_INJECT_LOCATION_CIVIC_ADDRESS.
+	NOTE: If the civic address is available with the AP, the AP Shall inject
+	the same using the new QMI API QMI_LOC_INJECT_LOCATION_CIVIC_ADDRESS.
 
-    If the civic address is not available, the AP shall NOT use the new QMI API
-    QMI_LOC_INJECT_LOCATION_CIVIC_ADDRESS. The existing DBH injection API should
-    be used to inject hybrid location is available.
+        If the civic address is not available, the AP shall NOT use the new QMI API
+	QMI_LOC_INJECT_LOCATION_CIVIC_ADDRESS. The existing DBH injection API should
+        be used to inject hybrid location is available.
   */
 }qmiLocEventWifiReqIndMsgT_v02;  /* Message */
 /**
@@ -12374,6 +12378,16 @@ typedef struct {
   /**<   Network-initiated message body.
        If the inject NI message type is TYPE_SUPL, the message contains
        a SUPL INIT message as defined in OMA-TS-ULP-V2_\hyperref[020110527C]{0-20110527-C}. */
+
+  /* Optional */
+  /*  Subscription ID */
+  uint8_t subId_valid;  /**< Must be set to true if subId is being passed */
+  qmiLocSysModemAsIdTypeEnumT_v02 subId;
+  /**<   Subscription ID on which the Network Initiated request came. Values: \n
+      - eQMI_LOC_SYS_MODEM_AS_ID_1 (0) --  Subscription ID 1 \n
+      - eQMI_LOC_SYS_MODEM_AS_ID_2 (1) --  Subscription ID 2 \n
+      - eQMI_LOC_SYS_MODEM_AS_ID_3 (2) --  Subscription ID 3
+ */
 }qmiLocInjectNetworkInitiatedMessageReqMsgT_v02;  /* Message */
 /**
     @}
@@ -13195,7 +13209,7 @@ typedef struct {
        - 0x01 (TRUE) -- GPS engine is in E911 mode \n
        - 0x00 (FALSE) -- GPS engine is not in E911 mode
 
-       Note: e911Mode shall be set as TRUE for Non-E911 Wifi Ap injections.
+	   Note: e911Mode shall be set as TRUE for Non-E911 Wifi Ap injections.
     */
 }qmiLocEventInjectWifiApDataReqIndMsgT_v02;  /* Message */
 /**
@@ -15487,10 +15501,10 @@ typedef struct {
   float polyCoefClockBias[QMI_LOC_SV_POLY_SV_CLKBIAS_COEFF_SIZE_V02];
   /**<    Polynomial coefficients for satellite clock bias correction (C0T, C1T, C2T, C3T). \n
           Units: \n
-          - 0th term -- Milliseconds per second \n
-          - First term -- Milliseconds per second^2 \n
-          - Second term -- Milliseconds per second^3 \n
-          - Third term -- Milliseconds per second^4
+          - 0th term -- Milliseconds \n
+          - 1st term -- Milliseconds per second^1 \n
+          - 2nd term -- Milliseconds per second^2 \n
+          - 3rd term -- Milliseconds per second^3
     */
 
   /* Optional */
@@ -15807,6 +15821,53 @@ typedef struct {
       - eQMI_LOC_EPHEMERIS_SOURCE_EFS (4) --  Source is EFS
 
  */
+
+  /* Optional */
+  /*  Polynomial Order Size */
+  uint8_t polyOrder_valid;  /**< Must be set to true if polyOrder is being passed */
+  uint8_t polyOrder;
+  /**<   Polynomial Order.\n
+         Maximum Poly Order size -- QMI_LOC_SV_POLY_XYZ_COEFF_ORDER_SIZE_MAX \n
+    */
+
+  /* Optional */
+  /*  Polynomial Valid Duration */
+  uint8_t validDuration_valid;  /**< Must be set to true if validDuration is being passed */
+  uint16_t validDuration;
+  /**<   Valid Polynomial Duration \n
+         - Units -- Seconds \n
+    */
+
+  /* Optional */
+  /*  Polynomial Coefficient's 0th - Nth Term for X, Y, and Z Coordinates */
+  uint8_t polyCoeffXYZ_valid;  /**< Must be set to true if polyCoeffXYZ is being passed */
+  uint32_t polyCoeffXYZ_len;  /**< Must be set to # of elements in polyCoeffXYZ */
+  double polyCoeffXYZ[QMI_LOC_SV_POLY_XYZ_COEFF_SIZE_MAX_V02];
+  /**<   Zero, First, Second,... Nth terms of the Polynomial coefficient for X, Y, and Z coordinates (C0X, C1X, ..., CNX, C0Y, C1Y,..., CNY, C0Z, C1Z, ..., CNZ).\n
+          Units: \n
+          - 0th term -- Meters \n
+          - 1st term -- Meters per second^1 \n
+          - 2nd term -- Meters per second^2 \n
+          - Nth term -- Meters per seconds^N \n
+
+          Note: N -- Polynomial Order Size as specified by polyOrder (TLV 0x36) \n
+    */
+
+  /* Optional */
+  /*  Polynomial Coefficients for Satellite Clock Bias Correction */
+  uint8_t polyClockBias_valid;  /**< Must be set to true if polyClockBias is being passed */
+  uint32_t polyClockBias_len;  /**< Must be set to # of elements in polyClockBias */
+  double polyClockBias[QMI_LOC_SV_POLY_SV_CLKBIAS_COEFF_SIZE_MAX_V02];
+  /**<    Polynomial coefficients for satellite clock bias correction (C0T, C1T, C2T, CNT). \n
+          Units: \n
+          - 0th term -- Milliseconds \n
+          - 1st term -- Milliseconds per second^1 \n
+          - 2nd term -- Milliseconds per second^2 \n
+          - Nth term -- Milliseconds per second^N \n
+
+          Note: N -- Polynomial Order Size as specified by polyOrder (TLV 0x36) \n
+
+    */
 }qmiLocEventGnssSvPolyIndMsgT_v02;  /* Message */
 /**
     @}
@@ -23660,8 +23721,8 @@ typedef struct {
         - Units -- Degrees \n
         - Range -- -90.0 to 90.0 \n
 
-        Note: Positive values indicate northern latitude,
-        Negative values indicate southern latitude
+		Note: Positive values indicate northern latitude,
+		Negative values indicate southern latitude
    */
 
   /* Optional */
@@ -23672,8 +23733,8 @@ typedef struct {
         - Units -- Degrees \n
         - Range -- -180.0 to 180.0 \n
 
-        Note: Positive values indicate eastern longitude,
-        Negative values indicate western longitude
+		Note: Positive values indicate eastern longitude,
+		Negative values indicate western longitude
    */
 
   /* Optional */
@@ -23693,7 +23754,7 @@ typedef struct {
         - 0, 101 to 255 -- invalid value\n
         - If 100 is received, reinterpret to 99 \n
 
-        Note: This field must be specified together with horizontal uncertainty.
+		Note: This field must be specified together with horizontal uncertainty.
         If not specified when horUncCircular is set, the default value is 50.
    */
 
@@ -23703,8 +23764,8 @@ typedef struct {
   float altitudeWrtEllipsoid;
   /**<   Altitude with respect to the WGS84 ellipsoid.\n
         - Units -- Meters
-        - Positive = height
-        - Negative = depth
+		- Positive = height
+		- Negative = depth
    */
 
   /* Optional */
@@ -23730,13 +23791,13 @@ typedef struct {
   uint8_t vertConfidence;
   /**<   Vertical confidence, as defined by ETSI TS 101 109. \n
         - Units -- Percent (0-99)\n
-        - 0 -- invalid value \n
-        - 100 to 256 -- not used \n
-        - If 100 is received, reinterpret to 99 \n
+		- 0 -- invalid value \n
+		- 100 to 256 -- not used \n
+		- If 100 is received, reinterpret to 99 \n
 
-        Note: This field must be specified together with the vertical uncertainty.
+		Note: This field must be specified together with the vertical uncertainty.
         If not specified, the default value is 50.
-    */
+	*/
 
   /* Optional */
   /*  Altitude Source */
@@ -24923,6 +24984,120 @@ typedef struct {
     @}
   */
 
+/** @addtogroup loc_qmi_enums
+    @{
+  */
+typedef enum {
+  QMILOCSDKFEATURECONFIGENUMT_MIN_ENUM_VAL_V02 = -2147483647, /**< To force a 32 bit signed enum.  Do not change or use*/
+  eQMI_LOC_SDK_FEATURE_CONFIG_ENABLE_V02 = 0, /**<  Enable Feature  */
+  eQMI_LOC_SDK_FEATURE_CONFIG_DISABLE_V02 = 1, /**<  Disable Feature.  */
+  eQMI_LOC_SDK_FEATURE_CONFIG_SUSPEND_V02 = 2, /**<  Suspend Feature  */
+  eQMI_LOC_SDK_FEATURE_CONFIG_RESUME_V02 = 3, /**<  Resume Feature.  */
+  QMILOCSDKFEATURECONFIGENUMT_MAX_ENUM_VAL_V02 = 2147483647 /**< To force a 32 bit signed enum.  Do not change or use*/
+}qmiLocSdkFeatureConfigEnumT_v02;
+/**
+    @}
+  */
+
+/** @addtogroup loc_qmi_messages
+    @{
+  */
+/** Request Message; Used by the control point to enable/disable/suspend/resume
+                     SDK controlled Location MPSS features. */
+typedef struct {
+
+  /* Optional */
+  /*  SDK feature Config command */
+  uint8_t featureConfig_valid;  /**< Must be set to true if featureConfig is being passed */
+  qmiLocSdkFeatureConfigEnumT_v02 featureConfig;
+  /**<   SDK Feature Config command.
+ Values: \n
+      - eQMI_LOC_SDK_FEATURE_CONFIG_ENABLE (0) --  Enable Feature
+      - eQMI_LOC_SDK_FEATURE_CONFIG_DISABLE (1) --  Disable Feature.
+      - eQMI_LOC_SDK_FEATURE_CONFIG_SUSPEND (2) --  Suspend Feature
+      - eQMI_LOC_SDK_FEATURE_CONFIG_RESUME (3) --  Resume Feature. */
+
+  /* Optional */
+  /*  Application hash */
+  uint8_t appHash_valid;  /**< Must be set to true if appHash is being passed */
+  uint32_t appHash_len;  /**< Must be set to # of elements in appHash */
+  uint8_t appHash[QMI_LOC_MAX_APP_HASH_LEN_V02];
+  /**<   APP hash. \n
+      - Type -- Array of bytes \n
+      - Maximum length of the array -- 64
+  */
+
+  /* Optional */
+  /*  Features Mask */
+  uint8_t featureStatusReport_valid;  /**< Must be set to true if featureStatusReport is being passed */
+  qmiLocFeaturesStatusMaskT_v02 featureStatusReport;
+  /**<   Bitmask indicating the features HLOS is requesting
+ to enable.
+ Valid bitmasks: \n
+      - QMI_LOC_FEATURE_STATUS_CARRIER_PHASE (0x00000001) --  Carrier Phase feature status. \n
+      - QMI_LOC_FEATURE_STATUS_SV_POLYNOMIALS (0x00000002) --  SV Polynomial reporting status.\n
+      - QMI_LOC_FEATURE_STATUS_SV_EPHEMERIS (0x00000004) --  SV Ephemeris reporting status.\n
+      - QMI_LOC_FEATURE_STATUS_SINGLE_FREQUENCY (0x00000008) --  GNSS Single Frequency status.\n
+      - QMI_LOC_FEATURE_STATUS_MULTI_FREQUENCY (0x00000010) --  GNSS Multi Frequency status. \n
+      - QMI_LOC_FEATURE_STATUS_TIME_FREQUENCY (0x00000020) --  Time and Frequency status.\n
+      - QMI_LOC_FEATURE_STATUS_TIME_UNCERTAINTY (0x00000040) --  Time Uncertainty  status. \n
+      - QMI_LOC_FEATURE_STATUS_CLOCK_ESTIMATE (0x00000080) --  Clock Estimate status. \n
+      - QMI_LOC_FEATURE_STATUS_DGNSS (0x00000100) --  DGNSS feature status. \n
+      - QMI_LOC_FEATURE_STATUS_QPPE (0x00000200) --  QPPE feature status.
+ */
+}qmiLocSetSdkFeatureConfigReqMsgT_v02;  /* Message */
+/**
+    @}
+  */
+
+/** @addtogroup loc_qmi_messages
+    @{
+  */
+/** Indication Message; Used by the control point to enable/disable/suspend/resume
+                     SDK controlled Location MPSS features. */
+typedef struct {
+
+  /* Mandatory */
+  /*  Status of Request */
+  qmiLocStatusEnumT_v02 status;
+  /**<   Status of the SDK Feature config request.
+ Values: \n
+      - eQMI_LOC_SUCCESS (0) --  Request was completed successfully \n
+      - eQMI_LOC_GENERAL_FAILURE (1) --  Request failed because of a general failure \n
+      - eQMI_LOC_UNSUPPORTED (2) --  Request failed because it is not supported \n
+      - eQMI_LOC_INVALID_PARAMETER (3) --  Request failed because it contained invalid parameters \n
+      - eQMI_LOC_ENGINE_BUSY (4) --  Request failed because the engine is busy \n
+      - eQMI_LOC_PHONE_OFFLINE (5) --  Request failed because the phone is offline \n
+      - eQMI_LOC_TIMEOUT (6) --  Request failed because it has timed out \n
+      - eQMI_LOC_CONFIG_NOT_SUPPORTED (7) --  Request failed because an undefined configuration was requested \n
+      - eQMI_LOC_INSUFFICIENT_MEMORY (8) --  Request failed because the engine could not allocate sufficient memory for the request \n
+      - eQMI_LOC_MAX_GEOFENCE_PROGRAMMED (9) --  Request failed because the maximum number of Geofences are already programmed \n
+      - eQMI_LOC_XTRA_VERSION_CHECK_FAILURE (10) --  Location service failed because of an XTRA version-based file format check failure \n
+      - eQMI_LOC_GNSS_DISABLED (11) --  Request failed because the location service is disabled   */
+
+  /* Optional */
+  /*  Features Mask */
+  uint8_t featureStatusReport_valid;  /**< Must be set to true if featureStatusReport is being passed */
+  qmiLocFeaturesStatusMaskT_v02 featureStatusReport;
+  /**<   Bitmask indicating the modem feature status for
+ features enabled with licenses.
+ Valid bitmasks: \n
+      - QMI_LOC_FEATURE_STATUS_CARRIER_PHASE (0x00000001) --  Carrier Phase feature status. \n
+      - QMI_LOC_FEATURE_STATUS_SV_POLYNOMIALS (0x00000002) --  SV Polynomial reporting status.\n
+      - QMI_LOC_FEATURE_STATUS_SV_EPHEMERIS (0x00000004) --  SV Ephemeris reporting status.\n
+      - QMI_LOC_FEATURE_STATUS_SINGLE_FREQUENCY (0x00000008) --  GNSS Single Frequency status.\n
+      - QMI_LOC_FEATURE_STATUS_MULTI_FREQUENCY (0x00000010) --  GNSS Multi Frequency status. \n
+      - QMI_LOC_FEATURE_STATUS_TIME_FREQUENCY (0x00000020) --  Time and Frequency status.\n
+      - QMI_LOC_FEATURE_STATUS_TIME_UNCERTAINTY (0x00000040) --  Time Uncertainty  status. \n
+      - QMI_LOC_FEATURE_STATUS_CLOCK_ESTIMATE (0x00000080) --  Clock Estimate status. \n
+      - QMI_LOC_FEATURE_STATUS_DGNSS (0x00000100) --  DGNSS feature status. \n
+      - QMI_LOC_FEATURE_STATUS_QPPE (0x00000200) --  QPPE feature status.
+ */
+}qmiLocSetSdkFeatureConfigIndMsgT_v02;  /* Message */
+/**
+    @}
+  */
+
 /* Conditional compilation tags for message removal */
 //#define REMOVE_QMI_LOC_ADD_CIRCULAR_GEOFENCE_V02
 //#define REMOVE_QMI_LOC_ADD_GEOFENCE_CONTEXT_V02
@@ -25107,6 +25282,7 @@ typedef struct {
 //#define REMOVE_QMI_LOC_SET_PROTOCOL_CONFIG_PARAMETERS_V02
 //#define REMOVE_QMI_LOC_SET_ROBUST_LOCATION_CONFIG_V02
 //#define REMOVE_QMI_LOC_SET_SBAS_CONFIG_V02
+//#define REMOVE_QMI_LOC_SET_SDK_FEATURE_CONFIG_V02
 //#define REMOVE_QMI_LOC_SET_SENSOR_CONTROL_CONFIG_V02
 //#define REMOVE_QMI_LOC_SET_SENSOR_PERFORMANCE_CONTROL_CONFIGURATION_V02
 //#define REMOVE_QMI_LOC_SET_SENSOR_PROPERTIES_V02
@@ -25616,6 +25792,9 @@ typedef struct {
 #define QMI_LOC_GET_TRIBAND_STATE_REQ_V02 0x00E8
 #define QMI_LOC_GET_TRIBAND_STATE_RESP_V02 0x00E8
 #define QMI_LOC_GET_TRIBAND_STATE_IND_V02 0x00E8
+#define QMI_LOC_SET_SDK_FEATURE_CONFIG_REQ_V02 0x00E9
+#define QMI_LOC_SET_SDK_FEATURE_CONFIG_RESP_V02 0x00E9
+#define QMI_LOC_SET_SDK_FEATURE_CONFIG_IND_V02 0x00E9
 /**
     @}
   */

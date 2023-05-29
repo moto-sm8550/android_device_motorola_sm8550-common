@@ -1,4 +1,3 @@
-
 /* Copyright (c) 2020-2021 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+Changes from Qualcomm Innovation Center are provided under the following license:
+
+Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted (subject to the limitations in the
+disclaimer below) provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of Qualcomm Innovation Center, Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
+GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
+HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // ============================================================================
 // LocationApiDataTypes.proto
@@ -45,8 +79,8 @@ enum LocationApiDataTypesVersion {
     LOCAPI_DATA_TYPES_VER_MAJOR = 1;
     // Minor - New features / API addition, new message/elemtent addition.
     // Bump the last byte of version i.e. x.2 to x.3
-    // Minor version 15: Add elapsed real time in PVT report
-    LOCAPI_DATA_TYPES_VER_MINOR = 15;
+    // Minor version 28: Add support for new DRE cues.
+    LOCAPI_DATA_TYPES_VER_MINOR = 28;
 }
 
 // ============================================================================
@@ -57,6 +91,12 @@ enum PBGnssSuplMode {
     PB_GNSS_SUPL_MODE_STANDALONE = 0;
     PB_GNSS_SUPL_MODE_MSB = 1;
     PB_GNSS_SUPL_MODE_MSA = 2;
+}
+
+enum PBFixQualityLevel {
+    PB_QUALITY_HIGH_ACCU_FIX_ONLY = 0;
+    PB_QUALITY_ANY_VALID_FIX = 1;
+    PB_QUALITY_ANY_OR_FAILED_FIX = 2;
 }
 
 /** GNSS Signal Type and RF Band */
@@ -198,6 +238,7 @@ enum PBGnssLocationInfoExtFlagMask {
     PB_GNSS_LOCATION_INFO_PROTECT_ALONG_TRACK_BIT = 0x8;  // valid protection level along track
     PB_GNSS_LOCATION_INFO_PROTECT_CROSS_TRACK_BIT = 0x10; // valid protection level cross track
     PB_GNSS_LOCATION_INFO_PROTECT_VERTICAL_BIT    = 0x20; // valid protection level vertical
+    PB_GNSS_LOCATION_INFO_DGNSS_STATION_ID_MASK_BIT = 0x40; // valid dgnss station id info
 };
 
 enum PBGnssLocationNavSolutionMask {
@@ -232,6 +273,8 @@ enum PBLocApiGnssSvOptionsMask {
     PB_GNSS_SV_OPTIONS_HAS_CARRIER_FREQUENCY_BIT   = 0x8;
     PB_GNSS_SV_OPTIONS_HAS_GNSS_SIGNAL_TYPE_BIT    = 0x10;
     PB_GNSS_SV_OPTIONS_HAS_BASEBAND_CARRIER_TO_NOISE_BIT = 0x20;
+    PB_GNSS_SV_OPTIONS_HAS_ELEVATION_BIT           = 0x40;
+    PB_GNSS_SV_OPTIONS_HAS_AZIMUTH_BIT             = 0x80;
 }
 
 enum PBGnssGloTimeStructTypeFlags {
@@ -287,17 +330,42 @@ enum PBLocationSystemInfoMask {
 }
 
 enum PBLocApiDrCalibrationStatusMask {
-    PB_DR_CALIBRATION_INVALID      = 0;
+    PB_DR_CALIBRATION_INVALID                = 0x00000000;
     // Indicate that roll calibration is needed. Need to take more turns on level ground
-    PB_DR_ROLL_CALIBRATION_NEEDED  = 1;
+    PB_DR_ROLL_CALIBRATION_NEEDED            = 0x00000001;
     // Indicate that pitch calibration is needed. Need to take more turns on level ground
-    PB_DR_PITCH_CALIBRATION_NEEDED = 2;
+    PB_DR_PITCH_CALIBRATION_NEEDED           = 0x00000002;
     // Indicate that yaw calibration is needed. Need to accelerate in a straight line
-    PB_DR_YAW_CALIBRATION_NEEDED   = 4;
+    PB_DR_YAW_CALIBRATION_NEEDED             = 0x00000004;
     // Indicate that odo calibration is needed. Need to accelerate in a straight line
-    PB_DR_ODO_CALIBRATION_NEEDED   = 8;
+    PB_DR_ODO_CALIBRATION_NEEDED             = 0x00000008;
     // Indicate that gyro calibration is needed. Need to take more turns on level ground
-    PB_DR_GYRO_CALIBRATION_NEEDED  = 16;
+    PB_DR_GYRO_CALIBRATION_NEEDED            = 0x00000010;
+    // Lot more turns on level ground needed
+    PB_DR_TURN_CALIBRATION_LOW               = 0x00000020;
+    // Some more turns on level ground needed
+    PB_DR_TURN_CALIBRATION_MEDIUM            = 0x00000040;
+    // Sufficient turns on level ground observed
+    PB_DR_TURN_CALIBRATION_HIGH              = 0x00000080;
+    // Lot more accelerations in straight line needed
+    PB_DR_LINEAR_ACCEL_CALIBRATION_LOW       = 0x00000100;
+    // Some more accelerations in straight line needed
+    PB_DR_LINEAR_ACCEL_CALIBRATION_MEDIUM    = 0x00000200;
+    // Sufficient acceleration events in straight line observed
+    PB_DR_LINEAR_ACCEL_CALIBRATION_HIGH      = 0x00000400;
+    // Lot more motion in straight line needed
+    PB_DR_LINEAR_MOTION_CALIBRATION_LOW      = 0x00000800;
+    // Some more motion in straight line needed
+    PB_DR_LINEAR_MOTION_CALIBRATION_MEDIUM   = 0x00001000;
+    // Sufficient motion events in straight line observed
+    PB_DR_LINEAR_MOTION_CALIBRATION_HIGH     = 0x00002000;
+    // Lot more stationary events on level ground needed
+    PB_DR_STATIC_CALIBRATION_LOW             = 0x00004000;
+    // Some more stationary events on level ground needed
+    PB_DR_STATIC_CALIBRATION_MEDIUM          = 0x00008000;
+    // Sufficient stationary events on level ground observed
+    PB_DR_STATIC_CALIBRATION_HIGH            = 0x00010000;
+
 }
 
 enum PBLeapSecondSysInfoMask {
@@ -496,10 +564,12 @@ enum PBLocationFlagsMask {
     PB_LOCATION_HAS_SPEED_ACCURACY_BIT       = 0x0040;
     // location has valid bearing accuracy
     PB_LOCATION_HAS_BEARING_ACCURACY_BIT     = 0x0080;
-    // location has valid valid Location::timestamp
+    // location has valid Location::timestamp
     PB_LOCATION_HAS_TIMESTAMP_BIT            = 0x0100;
-    // location has valid valid elapsedRealTime
+    // location has valid elapsedRealTime
     PB_LOCATION_HAS_ELAPSED_REAL_TIME_BIT    = 0x0200;
+    // location has valid time uncertainty
+    PB_LOCATION_HAS_TIME_UNC_BIT             = 0x0400;
 }
 
 enum PBLocationTechnologyMask {
@@ -526,10 +596,12 @@ enum PBLocationTechnologyMask {
     PB_LOCATION_TECHNOLOGY_VEH_BIT      = 0x000000200;
     // Visual data
     PB_LOCATION_TECHNOLOGY_VIS_BIT      = 0x000000400;
+    // location was calculated using propagation
+    PB_LOCATION_TECHNOLOGY_PROPAGATED_BIT = 0x000000800;
 }
 
 enum PBLocationCapabilitiesMask {
-    PB_LOCATION_CAPS_INVALID                           = 0;
+    PB_LOCATION_CAPS_INVALID                                   = 0x00000000;
     /** LocationClientApi can support time-based tracking session
      *  via LocationClientApi::startPositionSession(uint32_t,
      *  LocReqEngineTypeMask, const EngineReportCbs&, ResponseCb)
@@ -538,76 +610,102 @@ enum PBLocationCapabilitiesMask {
      *  LocationClientApi::startPositionSession(uint32_t, uint32_t,
      *  LocationCb, ResponseCb) with distanceInMeters set to 0.
      *  <br/> */
-    PB_LOCATION_CAPS_TIME_BASED_TRACKING_BIT           = 1;
+    PB_LOCATION_CAPS_TIME_BASED_TRACKING_BIT                   = 0x00000001;
     /** LocationClientApi can support time-based batching session
      *  via LocationClientApi::startRoutineBatchingSession() with
      *  minInterval specified. <br/> */
-    PB_LOCATION_CAPS_TIME_BASED_BATCHING_BIT           = 2;
+    PB_LOCATION_CAPS_TIME_BASED_BATCHING_BIT                   = 0x00000002;
     /** LocationClientApi can support distance based tracking
      *  session via
      *  LocationClientApi::startPositionSession(uint32_t, uint32_t,
      *  LocationCb, ResponseCb) with distanceInMeters specified.
      *  <br/> */
-    PB_LOCATION_CAPS_DISTANCE_BASED_TRACKING_BIT       = 4;
+    PB_LOCATION_CAPS_DISTANCE_BASED_TRACKING_BIT               = 0x00000004;
     /** LocationClientApi can support distance-based batching via
      *  LocationClientApi::startRoutineBatchingSession() with
      *  minDistance set to none-zero value. <br/> */
-    PB_LOCATION_CAPS_DISTANCE_BASED_BATCHING_BIT       = 8;
+    PB_LOCATION_CAPS_DISTANCE_BASED_BATCHING_BIT               = 0x00000008;
     /** LocationClientApi can support geo fence via
      *  LocationClientApi::addGeofences(). <br/>   */
-    PB_LOCATION_CAPS_GEOFENCE_BIT                      = 16;
+    PB_LOCATION_CAPS_GEOFENCE_BIT                              = 0x00000010;
     /** LocationClientApi can support trip batching via
      *  LocationClientApi::startTripBatchingSession(). <br/>   */
-    PB_LOCATION_CAPS_OUTDOOR_TRIP_BATCHING_BIT         = 32;
+    PB_LOCATION_CAPS_OUTDOOR_TRIP_BATCHING_BIT                 = 0x00000020;
     /** LocationClientApi can support receiving GnssMeasurements
      *  data in GnssMeasurementsCb when LocationClientApi is in
      *  a positioning session.. <br/>   */
-    PB_LOCATION_CAPS_GNSS_MEASUREMENTS_BIT             = 64;
+    PB_LOCATION_CAPS_GNSS_MEASUREMENTS_BIT                     = 0x00000040;
     /** LocationIntegrationApi can support configure constellations
      *  via LocationIntegrationApi::configConstellations.  <br/>   */
-    PB_LOCATION_CAPS_CONSTELLATION_ENABLEMENT_BIT      = 128;
+    PB_LOCATION_CAPS_CONSTELLATION_ENABLEMENT_BIT              = 0x00000080;
     /** Modem supports Carrier Phase for Precise Positioning
      *  Measurement Engine (PPME).
      *  This is a Standalone Feature.  <br/>   */
-    PB_LOCATION_CAPS_QWES_CARRIER_PHASE_BIT                 = 256;
+    PB_LOCATION_CAPS_QWES_CARRIER_PHASE_BIT                    = 0x00000100;
     /** Modem supports SV Polynomial for tightly coupled
      *  external DR support.
      *  This is a Standalone Feature.  <br/>   */
-    PB_LOCATION_CAPS_QWES_SV_POLYNOMIAL_BIT                 = 512;
+    PB_LOCATION_CAPS_QWES_SV_POLYNOMIAL_BIT                    = 0x00000200;
     /** Modem supports GNSS Single Frequency feature.
      *  This is a Standalone Feature.  <br/>   */
-    PB_LOCATION_CAPS_QWES_GNSS_SINGLE_FREQUENCY        = 1024;
+    PB_LOCATION_CAPS_QWES_GNSS_SINGLE_FREQUENCY                = 0x00000400;
     /** Modem supports GNSS Multi Frequency feature. Multi
      *  Frequency enables Single frequency also.  <br/>   */
-    PB_LOCATION_CAPS_QWES_GNSS_MULTI_FREQUENCY         = 2048;
+    PB_LOCATION_CAPS_QWES_GNSS_MULTI_FREQUENCY                 = 0x00000800;
     /** This mask indicates VEPP license bundle is enabled.
      *  VEPP bundle include Carrier Phase and SV Polynomial
      *  features.  <br/>   */
-    PB_LOCATION_CAPS_QWES_VPE                          = 4096;
+    PB_LOCATION_CAPS_QWES_VPE                                  = 0x00001000;
     /** This mask indicates support for CV2X Location basic
      *  features. This bundle includes features for GTS Time
      *  & Freq, C-TUNC (Constrained Time uncertainity.
      *  LocationIntegrationApi can support setting of C-TUNC
      *  via configConstrainedTimeUncertainty. <br/> */
-    PB_LOCATION_CAPS_QWES_CV2X_LOCATION_BASIC          = 8192;
+    PB_LOCATION_CAPS_QWES_CV2X_LOCATION_BASIC                  = 0x00002000;
     /** This mask indicates support for CV2X Location premium
      *  features. This bundle includes features for CV2X Location
      *  Basic features, QDR3 feature, and PACE. (Position
      *  Assisted Clock Estimator.
      *  LocationIntegrationApi can support setting of C-TUNC
      *  via configPositionAssistedClockEstimator. <br/> */
-    PB_LOCATION_CAPS_QWES_CV2X_LOCATION_PREMIUM        = 16384;
+    PB_LOCATION_CAPS_QWES_CV2X_LOCATION_PREMIUM                = 0x00004000;
     /** This mask indicates that PPE (Precise Positioning Engine)
      *  library is enabled or Precise Positioning Framework (PPF)
      *  is available. This bundle includes features for Carrier
      *  Phase and SV Ephermeris.  <br/>   */
-    PB_LOCATION_CAPS_QWES_PPE                          = 32768;
+    PB_LOCATION_CAPS_QWES_PPE                                  = 0x00008000;
     /** This mask indicates QDR2_C license bundle is enabled.
      *  This bundle includes features for SV Polynomial. <br/> */
-    PB_LOCATION_CAPS_QWES_QDR2                         = 65536;
+    PB_LOCATION_CAPS_QWES_QDR2                                 = 0x00010000;
     /** This mask indicates QDR3_C license bundle is enabled.
      *  This bundle includes features for SV Polynomial. <br/> */
-    PB_LOCATION_CAPS_QWES_QDR3                         = 131072;
+    PB_LOCATION_CAPS_QWES_QDR3                                 = 0x00020000;
+    /** This mask indicates DGNSS license bundle is enabled. <br/> */
+    PB_LOCATION_CAPS_QWES_DGNSS                                = 0x00040000;
+    /** This mask indicates Antenna info is enabled. <br/> */
+    PB_LOCATION_CAPS_ANTENNA_INFO                              = 0x00080000;
+    /** This mask indicates startTracking/startBatching API with
+     * LocationOptions.mode of MSB (Ms Based) . <br/> */
+    PB_LOCATION_CAPABILITIES_GNSS_MSB_BIT                      = 0x00100000;
+    /**This mask indicates supports startTracking/startBatching API
+     * with LocationOptions.mode of MSA (MS Assisted) . <br/> */
+    PB_LOCATION_CAPABILITIES_GNSS_MSA_BIT                      = 0x00200000;
+    /** This mask indicates support for debug nmea sentences
+     * in the debugNmeaCallback. <br/> */
+    PB_LOCATION_CAPABILITIES_DEBUG_DATA_BIT                    = 0x00400000;
+    /** This mask indicates support agpm .  <br/>   */
+    PB_LOCATION_CAPABILITIES_AGPM_BIT                          = 0x00800000;
+    /** This mask indicates support for location privacy.  <br/>   */
+    PB_LOCATION_CAPABILITIES_PRIVACY_BIT                       = 0x01000000;
+    /** This mask indicates support measurement corrections.  <br/>   */
+    PB_LOCATION_CAPABILITIES_MEASUREMENTS_CORRECTION_BIT       = 0x02000000;
+    /** This mask indicates support Robust Location.  <br/>   */
+    PB_LOCATION_CAPABILITIES_CONFORMITY_INDEX_BIT              = 0x04000000;
+    /** This mask indicates support precise location edgnss .  <br/>   */
+    PB_LOCATION_CAPABILITIES_EDGNSS_BIT                        = 0x08000000;
+    /** This mask indicates supports SV Ephemeris for tightly coupled external
+     * PPE engines. This is a Standalone Feature..  <br/>   */
+    PB_LOCATION_CAPABILITIES_QWES_SV_EPHEMERIS_BIT             = 0x10000000;
 }
 
 enum PBGnssDataMask {
@@ -634,9 +732,20 @@ enum PBLIALeverArmTypeMask {
 }
 
 enum PBDrSolutionStatusMask {
-    PB_VEHICLE_DRSOLUTION_INVALID = 0;
-    PB_VEHICLE_SENSOR_SPEED_INPUT_DETECTED = 1;
-    PB_VEHICLE_SENSOR_SPEED_INPUT_USED = 2;
+    PB_VEHICLE_DRSOLUTION_INVALID          = 0x00000000;
+    PB_VEHICLE_SENSOR_SPEED_INPUT_DETECTED = 0x00000001;
+    PB_VEHICLE_SENSOR_SPEED_INPUT_USED     = 0x00000002;
+    PB_DRE_ERROR_UNCALIBRATED              = 0x00000004;
+    PB_DRE_ERROR_GNSS_QUALITY_INSUFFICIENT = 0x00000008;
+    PB_DRE_ERROR_FERRY_DETECTED            = 0x00000010;
+    PB_DRE_ERROR_6DOF_SENSOR_UNAVAILABLE   = 0x00000020;
+    PB_DRE_ERROR_VEHICLE_SPEED_UNAVAILABLE = 0x00000040;
+    PB_DRE_ERROR_GNSS_EPH_UNAVAILABLE      = 0x00000080;
+    PB_DRE_ERROR_GNSS_MEAS_UNAVAILABLE     = 0x00000100;
+    PB_DRE_ERROR_NO_STORED_POSITION        = 0x00000200;
+    PB_DRE_ERROR_MOVING_AT_START           = 0x00000400;
+    PB_DRE_ERROR_POSITON_UNRELIABLE        = 0x00000800;
+    PB_DRE_ERROR_GENERIC                   = 0x00001000;
 }
 
 enum PBLocationSessionStatus {
@@ -694,6 +803,13 @@ enum PBNmeaTypesMask {
     PB_NMEA_TYPE_GIGSV    = 0x800;
 }
 
+enum PBGnssGeodeticDatumType {
+    // Geodetic datum defined in World Geodetic System 1984 (WGS84) format.
+    PB_GEODETIC_TYPE_WGS_84 = 0;
+    // Geodetic datum defined for use in the GLONASS system.
+    PB_GEODETIC_TYPE_PZ_90 = 1;
+}
+
 // ============================================================================
 // Messages
 // ============================================================================
@@ -732,6 +848,8 @@ message PBLocation {
     uint64 elapsedRealTime = 13;
     /** boot timestamp uncertainty corresponding to GPS timestamp, in ns */
     uint64 elapsedRealTimeUnc = 14;
+    /** time uncertainty in msec */
+    float  timeUncMs = 15;
 }
 
 message PBLocationOptions {
@@ -747,6 +865,8 @@ message PBLocationOptions {
     //  if engine hub is running, this will be fused fix,
     //  if engine hub is not running, this will be SPE fix
     uint32 locReqEngTypeMask = 4;
+    // Fix Quality Level
+    PBFixQualityLevel qualityLevelAccepted = 5;
 }
 
 message PBAidingData {
@@ -1049,7 +1169,9 @@ message PBGnssLocationInfoNotification {
     // Cross-track protection level, validity is set via extFlags
     float    protectCrossTrack = 45;
     // Vertical component protection level, validity is set via extFlags
-    float    protectVertical = 46;;
+    float    protectVertical = 46;
+    // dgnss station id, validity is set via extFlags
+    repeated uint32 dgnssStationId = 47;
 }
 
 message PBGnssDataNotification {
@@ -1199,6 +1321,29 @@ message PBLocationSystemInfo {
     PBLeapSecondSystemInfo   leapSecondSysInfo = 2;
 }
 
+// Disaster crisis report type from GNSS engine
+enum PBGnssDcReportType {
+    PB_GNSS_DC_REPORT_TYPE_UNDEFINED = 0;
+    // Disaster Prevention information provided by Japan Meteolorogical Agency
+    PB_QZSS_JMA_DISASTER_PREVENTION_INFO = 43;
+    //  Disaster Prevention information provided by other organizations
+    PB_QZSS_NON_JMA_DISASTER_PREVENTION_INFO = 44;
+};
+
+// Disaster crisis report from GNSS engine
+message PBGnssDcReportInfo {
+    // dc report type, as defined in standard
+    PBGnssDcReportType  dcReportType = 1;
+    // number of valid bits that client should make use in dcReportData
+    uint32              numValidBits = 2;
+    // dc report data, packed into uint8_t
+    repeated uint32     dcReportData = 3;
+     // SV's Pseudo-Random Number valid
+    bool              prnValid = 4;
+    // SV's Pseudo-Random Number
+    uint32              prn = 5;
+};
+
 message PBGnssConfigRobustLocationVersion {
     // Major version number
     uint32 major = 1;
@@ -1346,3 +1491,215 @@ message PBDeadReckoningEngineConfig {
     // sensor data-sheet or from actual calibration.
     float gyroScaleFactorUnc = 6;
 }
+
+// Specify the logcat debug level. Currently, only XTRA daemon
+// will support the runtime configure of debug log level.
+enum PBDebugLogLevel {
+    // No debug message will be outputed.
+    PB_DEBUG_LOG_LEVEL_NONE = 0;
+    // Only error level debug messages will get logged.
+    PB_DEBUG_LOG_LEVEL_ERROR = 1;
+    // Only warning/error level debug messages will get logged.
+    PB_DEBUG_LOG_LEVEL_WARNING = 2;
+    // Only info/wanring/error level debug messages will get logged.
+    PB_DEBUG_LOG_LEVEL_INFO = 3;
+    // Only debug/info/wanring/error level debug messages will get logged.
+    PB_DEBUG_LOG_LEVEL_DEBUG = 4;
+    // Verbose/debug/info/wanring/error level debug messages will get logged.
+    PB_DEBUG_LOG_LEVEL_VERBOSE = 5;
+};
+
+// Xtra feature configuration parameters
+message PBXtraConfigParams {
+    // Number of minutes between periodic, consecutive successful
+    // XTRA assistance data downloads. The configured value is in
+    // unit of 1 minute and will be capped at a maximum of 168
+    // hours and minimum of 48 hours. Please note this parameter
+    // does not apply to NTP time download.
+    // 0 value will use modem default XTRA download.
+    uint32 xtraDownloadIntervalMinute = 1;
+    // Connection timeout when connecting backend for both xtra
+    // assistance data download and NTP time downlaod. The
+    // configured value is in in unit of 1 second and should be
+    // capped at a maximum of 300 secs (not indefinite) and minimum
+    // of 3 secs.
+    uint32 xtraDownloadTimeoutSec = 2;
+    // Interval to wait before retrying xtra assistance data
+    // download in case of device error. The configured value is in
+    // unit of 1 minute and should be capped with a maximum of 1
+    // day and a minimum of 3 minutes. Please note that this
+    // parameter does not apply to NTP time download.
+    uint32 xtraDownloadRetryIntervalMinute = 3;
+    // Total number of allowed retry attempts for assistance data
+    // download in case of device error.
+    // The configured value is in unit of 1 retry and max number of
+    // allowed retry is 6 per download interval.
+    // Please note that this parameter does not apply to NTP
+    // time download.
+    uint32 xtraDownloadRetryAttempts = 4;
+    // Path to the certificate authority (CA) repository that need
+    // to be used for XTRA assistance data download. Max of 128
+    // bytes, including null-terminating byte will be supported.
+    // Please note that paraemter does not apply to NTP time
+    // download.
+    string xtraCaPath = 5;
+    // URLs from which XTRA assistance data will be fetched. Three
+    // URLs need to be configured when this API is used. The URLs
+    // shall include the port number to be used for download. Max
+    // of 128 bytes, including null-terminating byte will be
+    // supported. Valid xtra server URLs should start with
+    // "https://". */
+    repeated string xtraServerURLs = 6;
+    // URLs for NTP server to fetch current time.
+    // The URLs shall include the port number to be used for
+    // download. Max of 128 bytes, including null-terminating byte
+    // will be supported. Example of valid ntp server URL is:
+    //  ntp.contiserver.com:123.
+    repeated string ntpServerURLs = 7;
+    // Level of debug log messages that will be logged.
+    PBDebugLogLevel xtraDaemonDebugLogLevel = 8;
+    // Enable or disable XTRA integrity download.
+    bool xtraIntegrityDownloadEnable = 9;
+    // XTRA integrity download interval in unit of minutes
+    uint32 xtraIntegrityDownloadIntervalMinute = 10;
+};
+
+enum PBXtraStatusUpdateType {
+    // Not used, PB need first enum to start at 0
+    PB_XTRA_STATUS_UPDATE_UNDEFINED = 0;
+    // XTRA status update due to invoke getXtraStatus().
+    PB_XTRA_STATUS_UPDATE_UPON_QUERY = 1;
+    // XTRA status update due to first invokation of registerXtraStatusUpdate().
+    PB_XTRA_STATUS_UPDATE_UPON_REGISTRATION = 2;
+    // XTRA status update due to xtra feature enablement/disablement and
+    // status change in xtra assistance data status,
+    // e.g.: from unknown to known during device bootup, from VALID to NOT_VALID,
+    // or when XTRA data gets downloaded.
+    PB_XTRA_STATUS_UPDATE_UPON_STATUS_CHANGE = 3;
+};
+
+// Specify the XTRA assistance data status.
+enum PBXtraDataStatus {
+    // If XTRA feature is disabled or if XTRA feature is enabled,
+    // but XTRA daemon has not yet retrieved the assistance data
+    // status from modem on early stage of device bootup, xtra data
+    //  status will be unknown.
+    PB_XTRA_DATA_STATUS_UNKNOWN = 0;
+    // If XTRA feature is enabled, but XTRA data is not present
+    // on the device.
+    PB_XTRA_DATA_STATUS_NOT_AVAIL = 1;
+    // If XTRA feature is enabled, XTRA data has been downloaded
+    //  ever but no longer valid.
+    PB_XTRA_DATA_STATUS_NOT_VALID = 2;
+    // If XTRA feature is enabled, XTRA data has been downloaded
+    // and is currently valid.
+    PB_XTRA_DATA_STATUS_VALID = 3;
+};
+
+message PBXtraStatus {
+    // XTRA assistance data and NTP time download is enabled or disabled.
+    bool featureEnabled = 1;
+    // XTRA assistance data status. If XTRA assistance data download is
+    // not enabled, this field will be set to XTRA_DATA_STATUS_UNKNOWN.
+    PBXtraDataStatus xtraDataStatus = 2;
+    // Number of hours that xtra assistance data will remain valid.
+    // This field will be valid when xtraDataStatus is set to
+    // XTRA_DATA_STATUS_VALID.
+    // For all other XtraDataStatus, this field will be set to 0.
+    uint32 xtraValidForHours = 3;
+};
+
+message PBTimespec {
+    //second
+    uint64 tv_sec = 1;
+    //nanosecond
+    uint64 tv_nsec = 2;
+}
+
+message PBGnssDebugLocation {
+    // If not valid, fields 2 to 6 will be set to 0
+    bool valid = 1;
+    PBLocation location = 2;
+    double verticalAccuracyMeters = 3;
+    double speedAccuracyMetersPerSecond = 4;
+    double bearingAccuracyDegrees = 5;
+    PBTimespec utcReported = 6;
+}
+
+message PBGnssDebugTime {
+    // If not valid, fields 2 to 4 will be set to 0
+    bool valid = 1;
+    int64 timeEstimate = 2;
+    float timeUncertaintyNs = 3;
+    float frequencyUncertaintyNsPerSec = 4;
+}
+
+enum PBGnssEphemerisType {
+    PB_GNSS_EPH_TYPE_UNKNOWN = 0;
+    PB_GNSS_EPH_TYPE_EPHEMERIS = 1;
+    PB_GNSS_EPH_TYPE_ALMANAC = 2;
+}
+
+enum PBGnssEphemerisSource {
+    PB_GNSS_EPH_SOURCE_UNKNOWN = 0;
+    PB_GNSS_EPH_SOURCE_DEMODULATED = 1;
+    PB_GNSS_EPH_SOURCE_SUPL_PROVIDED = 2;
+    PB_GNSS_EPH_SOURCE_OTHER_SERVER_PROVIDED = 3;
+    PB_GNSS_EPH_SOURCE_LOCAL = 4;
+}
+
+enum PBGnssEphemerisHealth {
+    PB_GNSS_EPH_HEALTH_UNKNOWN = 0;
+    PB_GNSS_EPH_HEALTH_GOOD = 1;
+    PB_GNSS_EPH_HEALTH_BAD = 2;
+}
+
+message PBGnssDebugSatelliteInfo {
+    // Unique SV Identifier
+    // For SV Range of supported constellation,
+    // please refer to the comment section of svId in GnssSv
+    uint32 svid = 1;
+    PBLocApiGnss_LocSvSystemEnumType constellation = 2;
+    PBGnssEphemerisType ephemerisType = 3;
+    PBGnssEphemerisSource ephemerisSource = 4;
+    PBGnssEphemerisHealth ephemerisHealth = 5;
+    float ephemerisAgeSeconds = 6;
+    bool serverPredictionIsAvailable = 7;
+    float serverPredictionAgeSeconds = 8;
+}
+
+message PBGnssDebugReport {
+    PBGnssDebugLocation location = 1;
+    PBGnssDebugTime time = 2;
+    repeated PBGnssDebugSatelliteInfo satelliteInfo = 3;
+}
+
+// Antenna Info messages
+message PBGnssCoordinate {
+    double x = 1;
+    double xUncertainty = 2;
+    double y = 3;
+    double yUncertainty = 4;
+    double z = 5;
+    double zUncertainty = 6;
+}
+
+message PB2DimensionDoubleVector {
+    uint32 row = 1;
+    uint32 column = 2;
+    repeated double value = 3;
+}
+
+message PBGnssAntennaInformation {
+    double carrierFrequencyMHz = 1;
+    PBGnssCoordinate phaseCenterOffsetCoordinateMillimeters = 2;
+    PB2DimensionDoubleVector phaseCenterVariationCorrectionMillimeters = 3;
+    PB2DimensionDoubleVector phaseCenterVariationCorrectionUncertaintyMillimeters = 4;
+    PB2DimensionDoubleVector signalGainCorrectionDbi = 5;
+    PB2DimensionDoubleVector signalGainCorrectionUncertaintyDbi = 6;
+}
+
+message PBAntennaInformation {
+    repeated PBGnssAntennaInformation antennaInfos = 1;
+}
+
