@@ -26,6 +26,43 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
+/*
+Changes from Qualcomm Innovation Center are provided under the following license:
+
+Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted (subject to the limitations in the
+disclaimer below) provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of Qualcomm Innovation Center, Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
+GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
+HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #ifndef __SYSTEM_STATUS__
 #define __SYSTEM_STATUS__
 
@@ -161,16 +198,14 @@ public:
     uint32_t mJammerGlo;
     uint32_t mJammerBds;
     uint32_t mJammerGal;
-    double   mAgcGps;
-    double   mAgcGlo;
-    double   mAgcBds;
-    double   mAgcGal;
     uint32_t mGloBpAmpI;
     uint32_t mGloBpAmpQ;
     uint32_t mBdsBpAmpI;
     uint32_t mBdsBpAmpQ;
     uint32_t mGalBpAmpI;
     uint32_t mGalBpAmpQ;
+    uint32_t mJammedSignalsMask;
+    std::vector<int32_t> mJammerInd;
     inline SystemStatusRfAndParams() :
         mPgaGain(0),
         mGpsBpAmpI(0),
@@ -181,16 +216,13 @@ public:
         mJammerGlo(0),
         mJammerBds(0),
         mJammerGal(0),
-        mAgcGps(0),
-        mAgcGlo(0),
-        mAgcBds(0),
-        mAgcGal(0),
         mGloBpAmpI(0),
         mGloBpAmpQ(0),
         mBdsBpAmpI(0),
         mBdsBpAmpQ(0),
         mGalBpAmpI(0),
-        mGalBpAmpQ(0) {}
+        mGalBpAmpQ(0),
+        mJammedSignalsMask(0) {}
     inline SystemStatusRfAndParams(const SystemStatusPQWM1& nmea);
     bool equals(const SystemStatusItemBase& peer) override;
     void dump(void) override;
@@ -423,10 +455,16 @@ public:
 class SystemStatusENH : public SystemStatusItemBase {
 public:
     ENHDataItem mDataItem;
-    inline SystemStatusENH(bool enabled=false): mDataItem(enabled) {}
+    inline SystemStatusENH(bool enabled, ENHDataItem::Fields updateBit = ENHDataItem::FIELD_MAX):
+            mDataItem(enabled, updateBit) {}
     inline SystemStatusENH(const ENHDataItem& itemBase): mDataItem(itemBase) {}
+    inline virtual SystemStatusItemBase& collate(SystemStatusItemBase& peer) {
+        mDataItem.mEnhFields = ((const SystemStatusENH&)peer).mDataItem.mEnhFields;
+        mDataItem.updateFields();
+        return *this;
+    }
     inline bool equals(const SystemStatusItemBase& peer) override {
-        return mDataItem.mEnabled == ((const SystemStatusENH&)peer).mDataItem.mEnabled;
+        return mDataItem.mEnhFields == ((const SystemStatusENH&)peer).mDataItem.mEnhFields;
     }
 };
 
@@ -735,49 +773,7 @@ public:
         return mDataItem.mValue == ((const SystemStatusMccMnc&)peer).mDataItem.mValue;
     }
     inline void dump(void) override {
-        LOC_LOGD("TacMccMnc value=%s", mDataItem.mValue.c_str());
-    }
-};
-
-class SystemStatusBtDeviceScanDetail : public SystemStatusItemBase {
-public:
-    BtDeviceScanDetailsDataItem mDataItem;
-    inline SystemStatusBtDeviceScanDetail(): mDataItem() {}
-    inline SystemStatusBtDeviceScanDetail(const BtDeviceScanDetailsDataItem& itemBase):
-            mDataItem(itemBase) {}
-    inline bool equals(const SystemStatusItemBase& peer) override {
-        return mDataItem.mApSrnRssi ==
-                ((const SystemStatusBtDeviceScanDetail&)peer).mDataItem.mApSrnRssi &&
-                memcmp(mDataItem.mApSrnMacAddress,
-                ((const SystemStatusBtDeviceScanDetail&)peer).mDataItem.mApSrnMacAddress,
-                sizeof(mDataItem.mApSrnMacAddress)) == 0 &&
-                mDataItem.mApSrnTimestamp ==
-                ((const SystemStatusBtDeviceScanDetail&)peer).mDataItem.mApSrnTimestamp &&
-                mDataItem.mRequestTimestamp ==
-                ((const SystemStatusBtDeviceScanDetail&)peer).mDataItem.mRequestTimestamp &&
-                mDataItem.mReceiveTimestamp ==
-                ((const SystemStatusBtDeviceScanDetail&)peer).mDataItem.mReceiveTimestamp;
-    }
-};
-
-class SystemStatusBtleDeviceScanDetail : public SystemStatusItemBase {
-public:
-    BtLeDeviceScanDetailsDataItem mDataItem;
-    inline SystemStatusBtleDeviceScanDetail(): mDataItem() {}
-    inline SystemStatusBtleDeviceScanDetail(const BtLeDeviceScanDetailsDataItem& itemBase):
-            mDataItem(itemBase) {}
-    inline bool equals(const SystemStatusItemBase& peer) override {
-        return mDataItem.mApSrnRssi ==
-                ((const SystemStatusBtleDeviceScanDetail&)peer).mDataItem.mApSrnRssi &&
-                memcmp(mDataItem.mApSrnMacAddress,
-                ((const SystemStatusBtleDeviceScanDetail&)peer).mDataItem.mApSrnMacAddress,
-                sizeof(mDataItem.mApSrnMacAddress)) == 0 &&
-                mDataItem.mApSrnTimestamp ==
-                ((const SystemStatusBtleDeviceScanDetail&)peer).mDataItem.mApSrnTimestamp &&
-                mDataItem.mRequestTimestamp ==
-                ((const SystemStatusBtleDeviceScanDetail&)peer).mDataItem.mRequestTimestamp &&
-                mDataItem.mReceiveTimestamp ==
-                ((const SystemStatusBtleDeviceScanDetail&)peer).mDataItem.mReceiveTimestamp;
+        LOC_LOGD("TacMccMncCountry value=%s", mDataItem.mValue.c_str());
     }
 };
 
@@ -796,6 +792,50 @@ public:
     }
 };
 
+class SystemStatusPreciseLocationEnabled : public SystemStatusItemBase {
+public:
+    PreciseLocationEnabledDataItem mDataItem;
+    inline SystemStatusPreciseLocationEnabled(bool value = false): mDataItem(value) {}
+    inline SystemStatusPreciseLocationEnabled(const PreciseLocationEnabledDataItem& itemBase):
+            mDataItem(itemBase) {}
+    inline bool equals(const SystemStatusItemBase& peer) override {
+        return mDataItem.mPreciseLocationEnabled ==
+            ((const SystemStatusPreciseLocationEnabled&)peer).mDataItem.mPreciseLocationEnabled;
+    }
+    inline void dump(void) override {
+        LOC_LOGd("Precise Location Enabled: %d", mDataItem.mPreciseLocationEnabled);
+    }
+};
+
+class SystemStatusTrackingStarted : public SystemStatusItemBase {
+public:
+    TrackingStartedDataItem mDataItem;
+    inline SystemStatusTrackingStarted(bool value = false): mDataItem(value) {}
+    inline SystemStatusTrackingStarted(const TrackingStartedDataItem& itemBase):
+        mDataItem(itemBase) {}
+    inline bool equals(const SystemStatusItemBase& peer) override {
+        return mDataItem.mTrackingStarted ==
+            ((const SystemStatusTrackingStarted&)peer).mDataItem.mTrackingStarted;
+    }
+    inline void dump(void) override {
+        LOC_LOGd("Tracking started: %d", mDataItem.mTrackingStarted);
+    }
+};
+
+class SystemStatusNtripStarted : public SystemStatusItemBase {
+public:
+    NtripStartedDataItem mDataItem;
+    inline SystemStatusNtripStarted(bool value = false): mDataItem(value) {}
+    inline SystemStatusNtripStarted(const NtripStartedDataItem& itemBase):
+        mDataItem(itemBase) {}
+    inline bool equals(const SystemStatusItemBase& peer) override {
+        return mDataItem.mNtripStarted ==
+            ((const SystemStatusNtripStarted&)peer).mDataItem.mNtripStarted;
+    }
+    inline void dump(void) override {
+        LOC_LOGd("Ntrip started: %d", mDataItem.mNtripStarted);
+    }
+};
 /******************************************************************************
  SystemStatusReports
 ******************************************************************************/
@@ -845,8 +885,9 @@ public:
     std::vector<SystemStatusShutdownState>    mShutdownState;
     std::vector<SystemStatusTac>              mTac;
     std::vector<SystemStatusMccMnc>           mMccMnc;
-    std::vector<SystemStatusBtDeviceScanDetail> mBtDeviceScanDetail;
-    std::vector<SystemStatusBtleDeviceScanDetail> mBtLeDeviceScanDetail;
+    std::vector<SystemStatusPreciseLocationEnabled>  mPreciseLocationEnabled;
+    std::vector<SystemStatusTrackingStarted>  mTrackingStarted;
+    std::vector<SystemStatusNtripStarted>  mNtripStarted;
 };
 
 /******************************************************************************
@@ -887,6 +928,7 @@ public:
     bool eventPosition(const UlpLocation& location,const GpsLocationExtended& locationEx);
     bool eventDataItemNotify(IDataItemCore* dataitem);
     bool setNmeaString(const char *data, uint32_t len);
+    void setEngineDebugDataInfo(const GnssEngineDebugDataInfo& gnssEngineDebugDataInfo);
     bool getReport(SystemStatusReports& reports, bool isLatestonly = false,
             bool inSessionOnly = true) const;
     bool setDefaultGnssEngineStates(void);
@@ -895,8 +937,11 @@ public:
     bool updatePowerConnectState(bool charging);
     void resetNetworkInfo();
     bool eventOptInStatus(bool userConsent);
+    bool eventRegionStatus(bool region);
     bool eventInEmergencyCall(bool isEmergency);
-    void setTracking(bool tracking);
+    bool eventSetTracking(bool tracking, bool updateSysStatusTrkState);
+    bool eventNtripStarted(bool ntripStarted);
+    bool eventPreciseLocation(bool preciseLocation);
 };
 
 } // namespace loc_core

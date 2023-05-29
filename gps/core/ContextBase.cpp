@@ -26,6 +26,42 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+/*
+Changes from Qualcomm Innovation Center are provided under the following license:
+
+Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted (subject to the limitations in the
+disclaimer below) provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of Qualcomm Innovation Center, Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
+GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
+HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #define LOG_NDEBUG 0
 #define LOG_TAG "LocSvc_CtxBase"
 
@@ -41,7 +77,6 @@ namespace loc_core {
 
 #define SLL_LOC_API_LIB_NAME "libsynergy_loc_api.so"
 #define LOC_APIV2_0_LIB_NAME "libloc_api_v02.so"
-#define IS_SS5_HW_ENABLED  1
 
 loc_gps_cfg_s_type ContextBase::mGps_conf {};
 loc_sap_cfg_s_type ContextBase::mSap_conf {};
@@ -95,7 +130,6 @@ const loc_param_s_type ContextBase::mGps_conf_table[] =
   {"NMEA_TAG_BLOCK_GROUPING_ENABLED", &mGps_conf.NMEA_TAG_BLOCK_GROUPING_ENABLED, NULL, 'n'},
   {"NI_SUPL_DENY_ON_NFW_LOCKED",  &mGps_conf.NI_SUPL_DENY_ON_NFW_LOCKED, NULL, 'n'},
   {"ENABLE_NMEA_PRINT",  &mGps_conf.ENABLE_NMEA_PRINT, NULL, 'n'},
-  {"ROBUST_LOCATION_ENABLED", &mGps_conf.ROBUST_LOCATION_ENABLED, NULL, 'n'},
 };
 
 const loc_param_s_type ContextBase::mSap_conf_table[] =
@@ -117,6 +151,8 @@ const loc_param_s_type ContextBase::mSap_conf_table[] =
   {"SENSOR_ALGORITHM_CONFIG_MASK",   &mSap_conf.SENSOR_ALGORITHM_CONFIG_MASK,   NULL, 'n'}
 };
 
+uint32_t ContextBase::mAntennaInfoVectorSize = 0;
+
 void ContextBase::readConfig()
 {
     static bool confReadDone = false;
@@ -126,7 +162,11 @@ void ContextBase::readConfig()
         mGps_conf.INTERMEDIATE_POS = 0;
         mGps_conf.ACCURACY_THRES = 0;
         mGps_conf.NMEA_PROVIDER = 0;
+#ifdef FEATURE_AUTOMOTIVE
+        mGps_conf.GPS_LOCK = GNSS_CONFIG_GPS_LOCK_MO_AND_NI & (~GNSS_CONFIG_GPS_LOCK_NFW_V2X);
+#else
         mGps_conf.GPS_LOCK = GNSS_CONFIG_GPS_LOCK_MO_AND_NI;
+#endif
         mGps_conf.SUPL_VER = 0x10000;
         mGps_conf.SUPL_MODE = 0x1;
         mGps_conf.SUPL_ES = 0;
@@ -200,16 +240,14 @@ void ContextBase::readConfig()
         /* By default NMEA Printing is disabled */
         mGps_conf.ENABLE_NMEA_PRINT = 0;
 
-#ifdef USE_GLIB
-        // For LE target, disable by default
-        mGps_conf.ROBUST_LOCATION_ENABLED = 0x0;
-#else
-        // enable robust location and robust location on E911
-        mGps_conf.ROBUST_LOCATION_ENABLED = 0x11;
-#endif
-
         UTIL_READ_CONF(LOC_PATH_GPS_CONF, mGps_conf_table);
         UTIL_READ_CONF(LOC_PATH_SAP_CONF, mSap_conf_table);
+
+        loc_param_s_type ant_info_vector_table[] =
+        {
+            { "ANTENNA_INFO_VECTOR_SIZE", &mAntennaInfoVectorSize, NULL, 'n' }
+        };
+        UTIL_READ_CONF(LOC_PATH_ANT_CORR, ant_info_vector_table);
 
         if (strncmp(mGps_conf.NMEA_REPORT_RATE, "1HZ", sizeof(mGps_conf.NMEA_REPORT_RATE)) == 0) {
             /* NMEA reporting is configured at 1Hz*/
@@ -218,8 +256,8 @@ void ContextBase::readConfig()
             sNmeaReportRate = GNSS_NMEA_REPORT_RATE_NHZ;
         }
         LOC_LOGI("%s] GNSS Deployment: %s", __FUNCTION__,
-                ((mGps_conf.GNSS_DEPLOYMENT == 1) ? "SS5" :
-                ((mGps_conf.GNSS_DEPLOYMENT == 2) ? "QFUSION" : "QGNSS")));
+                ((mGps_conf.GNSS_DEPLOYMENT == QCSR_SS5_ENABLED) ? "SS5" :
+                ((mGps_conf.GNSS_DEPLOYMENT == PDS_API_ENABLED) ? "QFUSION" : "QGNSS")));
 
         switch (getTargetGnssType(loc_get_target())) {
           case GNSS_GSS:
@@ -285,7 +323,7 @@ LocApiBase* ContextBase::createLocApi(LOC_API_ADAPTER_EVENT_MASK_T exMask)
         if (NULL == (locApi = mLBSProxy->getLocApi(exMask, this))) {
             void *handle = NULL;
 
-            if (IS_SS5_HW_ENABLED == mGps_conf.GNSS_DEPLOYMENT) {
+            if (QCSR_SS5_ENABLED == mGps_conf.GNSS_DEPLOYMENT) {
                 libname = SLL_LOC_API_LIB_NAME;
             }
 

@@ -1,15 +1,3 @@
-prebuilt_etc {
-    name: "apdr.conf",
-    vendor: true,
-    src: "apdr.conf",
-}
-
-prebuilt_etc {
-
-    name: "batching.conf",
-    vendor: true,
-    src: "batching.conf",
-}
 
 prebuilt_etc {
 
@@ -19,27 +7,10 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "izat.conf",
-    vendor: true,
-    src: "izat.conf",
-}
 
-prebuilt_etc {
-    name: "lowi.conf",
+    name: "batching.conf",
     vendor: true,
-    src: "lowi.conf",
-}
-
-prebuilt_etc {
-    name: "sap.conf",
-    vendor: true,
-    src: "sap.conf",
-}
-
-prebuilt_etc {
-    name: "xtwifi.conf",
-    vendor: true,
-    src: "xtwifi.conf",
+    src: "batching.conf",
 }
 
 prebuilt_etc {
@@ -64,6 +35,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "gnss@2.0-qsap-location.policy",
+    vendor: true,
+    sub_dir: "seccomp_policy",
+    src: "seccomp_policy/gnss@2.0-qsap-location.policy",
+}
+
+prebuilt_etc {
     name: "gnss@2.0-xtwifi-client.policy",
     vendor: true,
     sub_dir: "seccomp_policy",
@@ -71,8 +49,8 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "gnss@2.0-xtwifi-inet-agent.policy",
+    name: "gnss@2.0-edgnss-daemon.policy",
     vendor: true,
     sub_dir: "seccomp_policy",
-    src: "seccomp_policy/gnss@2.0-xtwifi-inet-agent.policy",
+    src: "seccomp_policy/gnss@2.0-edgnss-daemon.policy",
 }

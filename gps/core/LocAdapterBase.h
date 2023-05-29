@@ -26,6 +26,43 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
+/*
+Changes from Qualcomm Innovation Center are provided under the following license:
+
+Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted (subject to the limitations in the
+disclaimer below) provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of Qualcomm Innovation Center, Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
+GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
+HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #ifndef LOC_API_ADAPTER_BASE_H
 #define LOC_API_ADAPTER_BASE_H
 
@@ -56,6 +93,14 @@ namespace loc_core {
 
 class LocAdapterProxyBase;
 
+typedef uint16_t DlpFeatureStatusMask;
+#define DLP_FEATURE_STATUS_QPPE_LIBRARY_PRESENT   0X01
+#define DLP_FEATURE_STATUS_QFE_LIBRARY_PRESENT    0X02
+#define DLP_FEATURE_ENABLED_BY_DEFAULT            0X04
+#define DLP_FEATURE_ENABLED_BY_QESDK              0X08
+#define DLP_FEATURE_STATUS_LIBRARY_PRESENT   (DLP_FEATURE_STATUS_QPPE_LIBRARY_PRESENT | \
+                                              DLP_FEATURE_STATUS_QFE_LIBRARY_PRESENT)
+
 class LocAdapterBase {
 private:
     static uint32_t mSessionIdCounter;
@@ -69,6 +114,8 @@ protected:
     LocAdapterProxyBase* mLocAdapterProxyBase;
     const MsgTask* mMsgTask;
     bool mAdapterAdded;
+    /* === QESDK RTK feature status =================================================== */
+    DlpFeatureStatusMask mDlpFeatureStatusMask;
 
     inline LocAdapterBase(const MsgTask* msgTask) :
         mIsMaster(false), mEvtMask(0), mContext(NULL), mLocApi(NULL),
@@ -128,6 +175,10 @@ public:
         mMsgTask->sendMsg(msg);
     }
 
+    inline void sendMsg(const LocMsg* msg, uint32_t delayInMs = 0) const {
+        mMsgTask->sendMsg(msg, delayInMs);
+    }
+
     inline void updateEvtMask(LOC_API_ADAPTER_EVENT_MASK_T event,
                               loc_registration_mask_status status)
     {
@@ -163,6 +214,14 @@ public:
     inline bool isEngineCapabilitiesKnown() { return mIsEngineCapabilitiesKnown;}
     inline void setEngineCapabilitiesKnown(bool value) { mIsEngineCapabilitiesKnown = value;}
 
+    inline void startTimeBasedTracking(const TrackingOptions& options,
+                                       LocApiResponse* adapterResponse) {
+        mLocApi->startTimeBasedTracking(options, adapterResponse);
+    }
+    inline void stopTimeBasedTracking(LocApiResponse* adapterResponse) {
+        mLocApi->stopTimeBasedTracking(adapterResponse);
+    }
+
     virtual void handleEngineUpEvent();
     virtual void handleEngineDownEvent();
     virtual void reportPositionEvent(const UlpLocation& location,
@@ -171,11 +230,6 @@ public:
                                      LocPosTechMask loc_technology_mask,
                                      GnssDataNotification* pDataNotify = nullptr,
                                      int msInWeek = -1);
-    virtual void reportEnginePositionsEvent(unsigned int count,
-                                            EngineLocationInfo* locationArr) {
-        (void)count;
-        (void)locationArr;
-    }
     virtual void reportSvEvent(const GnssSvNotification& svNotify);
     virtual void reportDataEvent(const GnssDataNotification& dataNotify, int msInWeek);
     virtual void reportNmeaEvent(const char* nmea, size_t length);
@@ -191,7 +245,7 @@ public:
     virtual bool requestLocation();
     virtual bool requestATL(int connHandle, LocAGpsType agps_type,
                             LocApnTypeMask apn_type_mask,
-                            LocSubId sub_id=LOC_DEFAULT_SUB);
+                            SubId sub_id=DEFAULT_SUB);
     virtual bool releaseATL(int connHandle);
     virtual bool requestNiNotifyEvent(const GnssNiNotification &notify, const void* data,
                                       const LocInEmergency emergencyState);
@@ -235,8 +289,11 @@ public:
     void requestCapabilitiesCommand(LocationAPI* client);
 
     virtual void reportLatencyInfoEvent(const GnssLatencyInfo& gnssLatencyInfo);
+    virtual void handleEngineLockStatusEvent(EngineLockState engineLockState);
+    virtual void reportEngDebugDataInfoEvent(GnssEngineDebugDataInfo& gnssEngineDebugDataInfo);
     virtual bool reportQwesCapabilities(
             const std::unordered_map<LocationQwesFeatureType, bool> &featureMap);
+    virtual void reportDcMessage(const GnssDcReportInfo& dcReport);
 };
 
 } // namespace loc_core
