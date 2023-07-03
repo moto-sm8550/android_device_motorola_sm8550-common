@@ -39,6 +39,7 @@ using ::vendor::lineage::livedisplay::V2_1::implementation::SunlightEnhancement;
 status_t RegisterAsServices() {
     status_t status = OK;
 
+/*
     sp<SunlightEnhancement> se = new SunlightEnhancement();
     if (se->isSupported()) {
         status = se->registerAsService();
@@ -57,7 +58,7 @@ status_t RegisterAsServices() {
                        << " (" << status << ")";
             return status;
         }
-    }
+    }*/
 
     std::shared_ptr<SDMController> controller = std::make_shared<SDMController>();
     sp<PictureAdjustment> pa = new PictureAdjustment(controller);
