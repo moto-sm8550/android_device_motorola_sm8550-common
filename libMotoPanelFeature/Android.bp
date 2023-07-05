@@ -1,0 +1,25 @@
+cc_library_headers {
+    name: "libMotoPanelFeature_headers",
+    vendor_available: true,
+    header_libs: [
+        "generated_kernel_headers",
+    ],
+    export_header_lib_headers: [
+        "generated_kernel_headers",
+    ],
+    export_include_dirs: ["."],
+}
+
+cc_library {
+    name: "libMotoPanelFeature",
+    srcs: ["libMotoPanelFeature.cpp"],
+    header_libs: ["libMotoPanelFeature_headers"],
+    shared_libs: [
+        "liblog",
+        "libutils",
+    ],
+    export_header_lib_headers: [
+        "libMotoPanelFeature_headers",
+    ],
+    vendor_available: true,
+}
