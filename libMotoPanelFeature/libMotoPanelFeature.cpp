@@ -21,6 +21,7 @@ int writeToPanelIoctl(panel_param_info paramInfo) {
         ret = ioctl(fd, 0xc008649f, &paramInfo);
     }
 
+    close(fd);
     return ret;
 }
 
