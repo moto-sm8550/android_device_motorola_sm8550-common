@@ -391,11 +391,6 @@ vendor/etc/init/vendor.qti.diag_userdebug.rc
 vendor/lib/vendor.qti.diaghal@1.0.so
 vendor/lib64/vendor.qti.diaghal@1.0.so
 
-# Display - Gralloc
-vendor/lib64/libgralloc.qti.so
-vendor/lib64/libgralloccore.so
-vendor/lib64/libgrallocutils.so
-
 # Display - HDR
 vendor/etc/hdr_tm_config.xml
 vendor/lib64/libhdr_backlight_adapter.so
