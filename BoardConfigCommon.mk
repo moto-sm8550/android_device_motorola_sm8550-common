@@ -56,7 +56,7 @@ BOARD_KERNEL_CMDLINE += mem.enable_mglru=1
 BOARD_BOOTCONFIG += androidboot.hardware=qcom
 BOARD_BOOTCONFIG += androidboot.memcg=1
 BOARD_BOOTCONFIG += androidboot.usbcontroller=a600000.dwc3
-BOARD_BOOTCONFIG += androidboot.selinux=permissive
+# BOARD_BOOTCONFIG += androidboot.selinux=permissive
 BOARD_KERNEL_IMAGE_NAME := Image
 BOARD_KERNEL_PAGESIZE := 4096
 # BOARD_KERNEL_SEPARATED_DTBO := true
