@@ -103,6 +103,7 @@ on post-fs
     mkdir /mnt/vendor/persist/public/att_dm 0775 radio vendor_tcmd
     mkdir /mnt/vendor/persist/public/hiddenmenu 0775 radio vendor_tcmd
     mkdir /mnt/vendor/persist/public/hiddenmenu/data 0775 system vendor_tcmd
+    mkdir /mnt/vendor/persist/uwb 0775 vendor_tcmd vendor_tcmd
     mkdir /persist/public/locale 0700 system system
     mkdir /persist/public/omadm 0700 radio radio
     mkdir /persist/public/svcs 0770 system system
@@ -466,6 +467,11 @@ on property:sys.boot_completed=1
     start vendor.mbm_spy
 
 service vendor.mmi-touch-sh /vendor/bin/init.mmi.touch.sh
+    class core
+    user root
+    oneshot
+
+service vendor.mmi-display-sh /vendor/bin/init.mmi.display.sh
     class core
     user root
     oneshot

@@ -243,6 +243,9 @@ ro.surface_flinger.use_color_management=true
 ro.surface_flinger.use_content_detection_for_refresh_rate=true
 ro.surface_flinger.wcg_composition_dataspace=143261696
 
+# Gatekeeper
+vendor.gatekeeper.is_security_level_spu=0
+
 # IMS
 persist.vendor.lte.pco_supported=true
 persist.vendor.rcs.singlereg.feature=1

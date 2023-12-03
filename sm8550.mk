@@ -194,7 +194,7 @@ PRODUCT_PACKAGES += \
 
 # GPS
 PRODUCT_PACKAGES += \
-    android.hardware.gnss-V2-ndk.vendor \
+    android.hardware.gnss-V4-ndk.vendor \
     gnss@2.0-base.policy \
     gnss@2.0-edgnss-daemon.policy \
     gnss@2.0-qsap-location.policy \

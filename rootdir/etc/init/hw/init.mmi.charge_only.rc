@@ -42,13 +42,6 @@ on moto-charger
     write /sys/devices/system/cpu/cpu6/online 0
     write /sys/devices/system/cpu/cpu7/online 0
 
-    #Enable UFS clock scaling back
-    write /sys/bus/platform/devices/1d84000.ufshc/clkscale_enable 1
-    #Enable UFS auto_hibern8 back
-    write /sys/bus/platform/devices/1d84000.ufshc/auto_hibern8 5000
-    #Enable UFS clock gating back
-    write /sys/bus/platform/devices/1d84000.ufshc/clkgate_enable 1
-
 on moto-charger && property:ro.vendor.build.motfactory=1
     wait /sys/class/power_supply/battery/device/factory_image_mode
     write /sys/class/power_supply/battery/device/factory_image_mode 1
