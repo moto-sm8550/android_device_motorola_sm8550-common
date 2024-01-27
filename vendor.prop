@@ -293,9 +293,6 @@ vendor.usb.rndis.func.name=gsi
 vendor.usb.use_ffs_mtp=1
 vendor.usb.use_gadget_hal=1
 
-# Wfd
-persist.sys.wfd.virtual=0
-
 # WiFi
 wifi.aware.interface=wifi-aware0
 
