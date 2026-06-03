@@ -4,6 +4,9 @@ import /vendor/etc/init/hw/init.mmi.chipset.rc
 # Target-specific file
 import /vendor/etc/init/hw/init.mmi.overlay.rc
 
+on early-init
+    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -r -d /vendor/lib/modules zram
+
 on early-boot
     write /sys/module/subsystem_restart/parameters/disable_restart_work 0x0
 
@@ -300,7 +303,7 @@ on boot
 on property:sys.boot_completed=1 && property:ro.vendor.zram.swapon=true
     write /sys/block/zram0/comp_algorithm lz4
     write /proc/sys/vm/page-cluster 0
-    swapon_all /vendor/etc/fstab.qcom
+    swapon_all /vendor/etc/fstab.qcom.zram
     write /proc/sys/vm/swappiness 100
     setprop sys.sysctl.swappiness 100
 
