@@ -111,11 +111,11 @@ vendor/lib64/libspatializerparamstorage.so
 vendor/lib64/vendor.qti.hardware.pal@1.0-impl.so
 
 # Audio misc
+vendor/etc/ap_gain.bin
+vendor/etc/ap_gain_mmul.bin
 vendor/etc/models/acd/event.eai
 vendor/etc/models/acd/music.eai
 vendor/etc/models/acd/speech.eai
-vendor/etc/ap_gain.bin
-vendor/etc/ap_gain_mmul.bin
 
 # Audio - radar
 vendor/etc/vintf/manifest/manifest.xml
@@ -140,15 +140,15 @@ vendor/lib64/hw/vendor.qti.hardware.btconfigstore@2.0-impl.so
 vendor/lib64/hw/vendor.qti.hardware.bttpi-impl.so
 vendor/lib64/libbtnv.so
 vendor/lib64/libsoc_helper.so
-vendor/lib64/vendor.qti.hardware.bttpi-V2-ndk.so
 vendor/lib64/vendor.qti.hardware.bluetooth_sar@1.0.so
 vendor/lib64/vendor.qti.hardware.bluetooth_sar@1.1.so
+vendor/lib64/vendor.qti.hardware.bttpi-V2-ndk.so
 
 # Bluetooth (A2DP)
+vendor/lib64/btaudio_offload_if.so
 vendor/lib64/hw/android.hardware.bluetooth.audio-impl-qti.so
 vendor/lib64/hw/vendor.qti.hardware.bluetooth_audio@2.0-impl.so
 vendor/lib64/hw/vendor.qti.hardware.bluetooth_audio@2.1-impl.so
-vendor/lib64/btaudio_offload_if.so
 vendor/lib64/libbluetooth_audio_session_aidl_qti.so
 vendor/lib64/libbluetooth_audio_session_qti.so
 vendor/lib64/libbluetooth_audio_session_qti_2_1.so
@@ -209,6 +209,8 @@ vendor/etc/charger_fw_fstab.qti
 vendor/app/CneApp/CneApp.apk;REQUIRED=CneApp.libvndfwk_detect_jni.qti_vendor_symlink
 vendor/app/IWlanService/IWlanService.apk
 vendor/bin/cnd
+vendor/etc/cne/mwqem.conf
+vendor/etc/cne/profileMwqem.xml
 vendor/etc/cne/wqeclient/ATT/ATT_profile1.xml
 vendor/etc/cne/wqeclient/ATT/ATT_profile2.xml
 vendor/etc/cne/wqeclient/ATT/ATT_profile3.xml
@@ -238,8 +240,6 @@ vendor/etc/cne/wqeclient/VZW/VZW_profile4.xml
 vendor/etc/cne/wqeclient/VZW/VZW_profile5.xml
 vendor/etc/cne/wqeclient/VZW/VZW_profile6.xml
 vendor/etc/cne/wqeclient/VZW/VZW_profile7.xml
-vendor/etc/cne/mwqem.conf
-vendor/etc/cne/profileMwqem.xml
 vendor/etc/default-permissions/com.qualcomm.qti.cne.xml
 vendor/etc/init/cnd.rc
 vendor/etc/vintf/manifest/dataconnection-saidl.xml
@@ -357,6 +357,7 @@ vendor/lib64/libmemutils.so
 vendor/lib64/libvmmem.so
 
 # Display - SDM
+vendor/etc/clstc_config_library.xml
 vendor/etc/display/DPU660.xml
 vendor/etc/display/DPU670.xml
 vendor/etc/display/DPU720.xml
@@ -367,7 +368,6 @@ vendor/etc/display/DPU960.xml
 vendor/etc/display/DPU9__.xml
 vendor/etc/display/advanced_sf_offsets.xml
 vendor/etc/display/thermallevel_to_fps.xml
-vendor/etc/clstc_config_library.xml
 vendor/lib64/libclstc_algorithm_adapter.so
 vendor/lib64/libclstc_gcp_adapter.so
 vendor/lib64/libclstc_tm.so
@@ -398,8 +398,8 @@ vendor/etc/snapdragon_color_libs_config.xml
 vendor/lib64/libbacklight-calib.so
 vendor/lib64/libdigital-dimming.so
 vendor/lib64/libdisp-aba.so
-vendor/lib64/libhdr_backlight_adapter.so
 vendor/lib64/libdpps.so
+vendor/lib64/libhdr_backlight_adapter.so
 vendor/lib64/libqdcm-algo.so
 vendor/lib64/libqdcm-json-mode-parser.so
 vendor/lib64/libqdcm-mode-parser.so
@@ -484,9 +484,9 @@ vendor/etc/init/android.hardware.gatekeeper@1.0-service-qti.rc
 vendor/lib64/hw/android.hardware.gatekeeper@1.0-impl-qti.so
 
 # GNSS
-vendor/bin/hw/android.hardware.gnss-aidl-service-qti
 vendor/bin/edgnss-daemon
 vendor/bin/engine-service
+vendor/bin/hw/android.hardware.gnss-aidl-service-qti
 vendor/bin/loc_launcher
 vendor/bin/lowi-server
 vendor/bin/mlid
@@ -679,10 +679,10 @@ vendor/bin/msm_irqbalance
 vendor/etc/msm_irqbalance.conf
 
 # Kernel
+vendor/bin/init.kernel.post_boot-kalama.sh
 vendor/bin/init.kernel.post_boot-kalama_3_2_1.sh
 vendor/bin/init.kernel.post_boot-kalama_3_4_0.sh
 vendor/bin/init.kernel.post_boot-kalama_default_3_4_1.sh
-vendor/bin/init.kernel.post_boot-kalama.sh
 vendor/bin/init.kernel.post_boot.sh
 vendor/bin/init.qti.kernel.sh
 vendor/bin/init.qti.write.sh
@@ -769,9 +769,9 @@ vendor/lib64/qti.video.utils.videobufferlayout.so
 vendor/lib64/vendor.qti.hardware.qconfig@1.0.so
 
 # Media configs
-vendor/etc/media_kalama/video_system_specs.json
 vendor/etc/media_codecs_kalama_vendor.xml:vendor/etc/media_codecs_kalama.xml;TRYSRCFIRST
 vendor/etc/media_codecs_performance_kalama_vendor.xml:vendor/etc/media_codecs_performance_kalama.xml;TRYSRCFIRST
+vendor/etc/media_kalama/video_system_specs.json
 vendor/etc/media_profiles_V1_0.xml
 vendor/etc/media_profiles_kalama.xml
 
@@ -897,9 +897,9 @@ vendor/lib64/libsystem_health_mon.so
 # QSEECOM
 vendor/bin/hw/vendor.qti.hardware.qseecom@1.0-service
 vendor/bin/qseecomd
+vendor/etc/gpfspath_oem_config.xml
 vendor/etc/init/qseecomd.rc
 vendor/etc/init/vendor.qti.hardware.qseecom@1.0-service.rc
-vendor/etc/gpfspath_oem_config.xml
 vendor/lib64/hw/vendor.qti.hardware.qseecom@1.0-impl.so
 vendor/lib64/libGPreqcancel.so
 vendor/lib64/libGPreqcancel_svc.so
@@ -925,8 +925,8 @@ system_ext/etc/permissions/qti_libpermissions.xml
 system_ext/etc/permissions/qti_permissions.xml
 system_ext/framework/qcrilhook.jar
 system_ext/priv-app/qcrilmsgtunnel/qcrilmsgtunnel.apk
-vendor/bin/hw/qcrilNrd
 vendor/bin/dlsc
+vendor/bin/hw/qcrilNrd
 vendor/bin/ks
 vendor/bin/qms
 vendor/bin/qtigetprop
@@ -1003,6 +1003,7 @@ vendor/etc/qcril_database/upgrade/other/3_version_update_wps_config_qcrilnr.sql;
 vendor/etc/qcril_database/upgrade/other/6_version_change_property_table_qcrilnr.sql;FILEGROUP=proprietary_rildb_other_sql_files
 vendor/etc/seccomp_policy/qcrilnr@2.0.policy
 vendor/etc/seccomp_policy/qms.policy
+vendor/etc/telephony_packages.xml
 vendor/etc/vintf/manifest/android.hardware.radio.config.xml
 vendor/etc/vintf/manifest/android.hardware.radio.data.xml
 vendor/etc/vintf/manifest/android.hardware.radio.messaging.xml
@@ -1016,7 +1017,6 @@ vendor/etc/vintf/manifest/qms-saidl.xml
 vendor/etc/vintf/manifest/qtiradio-saidl.xml
 vendor/etc/vintf/manifest/vendor.qti.hardware.radio.am.xml
 vendor/etc/vintf/manifest/vendor.qti.hardware.radio.qtiradioconfig.xml
-vendor/etc/telephony_packages.xml
 vendor/lib64/deviceInfoServiceModuleNr.so
 vendor/lib64/lib-qhcpservice.so
 vendor/lib64/libQtiRilLoadable.so
@@ -1266,8 +1266,8 @@ vendor/firmware/vpu33_4v_unsigned.mbn
 # Widevine DRM
 vendor/bin/hw/android.hardware.drm-service.widevine
 vendor/etc/init/android.hardware.drm-service.widevine.rc
-vendor/etc/vintf/manifest/manifest_android.hardware.drm-service.widevine.xml
 vendor/etc/qcom_widevine_licenses.pfm
+vendor/etc/vintf/manifest/manifest_android.hardware.drm-service.widevine.xml
 vendor/lib64/libwvaidl.so
 
 # WiFi
@@ -1308,6 +1308,7 @@ system_ext/priv-app/WfdService/WfdService.apk|b8a1d9f83804d274fab6e09e0607082801
 vendor/bin/wfdhdcphalservice
 vendor/bin/wfdvndservice
 vendor/bin/wifidisplayhalservice
+vendor/etc/ArmHDCP_QTI_Android.cfg
 vendor/etc/init/android.hardware.drm@1.1-service.wfdhdcp.rc
 vendor/etc/init/com.qualcomm.qti.wifidisplayhal@1.0-service.rc
 vendor/etc/init/wfdvndservice.rc
@@ -1316,7 +1317,6 @@ vendor/etc/seccomp_policy/wfdvndservice.policy
 vendor/etc/seccomp_policy/wifidisplayhalservice.policy
 vendor/etc/vintf/manifest/android.hardware.drm-service.xml
 vendor/etc/vintf/manifest/vendor.qti.hardware.wifidisplaysession-service.xml
-vendor/etc/ArmHDCP_QTI_Android.cfg
 vendor/etc/wfdconfig.xml
 vendor/lib64/hw/vendor.qti.hardware.wifidisplaysession@1.0-impl.so
 vendor/lib64/libDxHdcp.so
