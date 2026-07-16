@@ -118,7 +118,7 @@ vendor/etc/models/acd/music.eai
 vendor/etc/models/acd/speech.eai
 
 # Audio - radar
-vendor/etc/vintf/manifest/manifest.xml
+vendor/etc/vintf/manifest/manifest.xml:vendor/etc/vintf/manifest/motorola.hardware.audio.radar.xml
 vendor/lib64/hw/audio_radar.primary.default.so
 vendor/lib64/hw/motorola.hardware.audio.radar@1.0-impl.so
 vendor/lib64/motorola.hardware.audio.radar@1.0.so
