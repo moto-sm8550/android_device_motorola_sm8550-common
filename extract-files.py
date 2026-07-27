@@ -73,6 +73,8 @@ blob_fixups: blob_fixups_user_type = {
         .add_line_if_missing('pipe2: 1'),
     'vendor/etc/sensors/hals.conf': blob_fixup()
         .add_line_if_missing('sensors.moto_ext.so'),
+    'vendor/etc/public.libraries.txt': blob_fixup()
+        .regex_replace('libqti-perfd-client.so\n', ''),
     'vendor/lib64/libqcodec2_core.so': blob_fixup()
         .add_needed('libcodec2_shim.so'),
     'vendor/lib64/vendor.libdpmframework.so': blob_fixup()
