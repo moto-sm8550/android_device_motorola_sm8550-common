@@ -774,10 +774,6 @@ system_ext/etc/init/qspa_system.rc
 system_ext/etc/qspa/qspa_default.rc
 
 # QSPM
-vendor/bin/vendor.qti.qspmhal@1.0-service
-vendor/etc/init/vendor.qti.qspmhal@1.0-service.rc
-vendor/etc/seccomp_policy/qspm.policy
-vendor/lib64/vendor.qti.qspmhal@1.0-impl.so
 vendor/lib64/vendor.qti.qspmhal@1.0.so
 
 # RIL - UIM
