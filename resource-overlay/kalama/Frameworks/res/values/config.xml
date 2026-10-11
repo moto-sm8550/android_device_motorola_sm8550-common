@@ -31,7 +31,7 @@
              nr5gc : nr5gcSupportedRelease
              eutran5gc : eutran5gcSupportedRelease
     -->
-    <string-array name="config_telephonyEuiccDeviceCapabilities">
+    <string-array name="config_telephonyEuiccDeviceCapabilities" translatable="false">
         <item>gsm,11</item>
         <item>utran,9</item>
         <item>eutran,15</item>
@@ -39,7 +39,7 @@
     </string-array>
 
     <!-- Default files to pin via Pinner Service -->
-    <string-array name="config_defaultPinnerServiceFiles">
+    <string-array name="config_defaultPinnerServiceFiles" translatable="false">
         <item>"/apex/com.android.art/javalib/core-oj.jar"</item>
         <item>"/apex/com.android.art/javalib/core-libart.jar"</item>
         <item>"/apex/com.android.media/javalib/updatable-media.jar"</item>

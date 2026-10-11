@@ -10,7 +10,7 @@
     <!-- List of allowed channels in 6GHz band for softap. If the device doesn't want to restrict
          channels this should be empty. Values is a comma separated channel string and/or channel
          range string like '36-48,149'. -->
-    <string name="config_wifiSoftap6gChannelList">1-233</string>
+    <string name="config_wifiSoftap6gChannelList" translatable="false">1-233</string>
 
     <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
     <bool name="config_wifi_softap_acs_supported">true</bool>
@@ -62,10 +62,4 @@
          immediately after the country code is sent to the driver (if the method returns a
          success). -->
     <bool name="config_wifiDriverSupportedNl80211RegChangedEvent">true</bool>
-
-    <!-- Boolean indicating whether to disable firmware roaming when the device goes into idle mode.
-         true: firmware roaming will be disabled when the device goes into idle mode and screen
-               is off, and then re-activated when the device exits idle mode or screen is on.
-         false: firmware roaming will not be affected. -->
-    <bool name="config_wifiDisableFirmwareRoamingInIdleMode">true</bool>
 </resources>
